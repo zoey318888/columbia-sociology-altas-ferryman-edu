@@ -1,0 +1,2511 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>哥大社会学知识地图</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f4ee; --bg2:#fbfaf7; --ink:#1f2d31; --ink2:#0f1a1d; --muted:#6d7778;
+  --line:#e5ded0; --paper:rgba(255,255,255,.92);
+  --shadow:0 16px 42px rgba(30,40,42,.08);
+  --blue:#6da8db; --green:#7eb690; --gold:#d5aa53; --red:#dc8b76;
+  --purple:#a894d3; --teal:#7ab5bc; --slate:#97a1a7;
+  --sea:#dbeaf2; --sea2:#cee0ea; --land:#efe9d8; --landEdge:#cdc3a8;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;color:var(--ink);overflow:hidden;
+  font-family:Inter,"Noto Serif SC",-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;
+  background:radial-gradient(1200px 800px at 12% 10%,#fffdf4,#f5f1e7 60%,#ece6d5)}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 86% 14%,rgba(126,182,144,.08),transparent 30%),
+             radial-gradient(circle at 32% 92%,rgba(213,170,83,.06),transparent 30%)}
+button,input{font-family:inherit;color:inherit}
+.app{height:100vh;padding:14px;display:flex;flex-direction:column;gap:12px}
+.top{min-height:84px;background:var(--paper);backdrop-filter:blur(12px);border-radius:24px;
+  box-shadow:var(--shadow);padding:14px 20px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;z-index:5}
+.kicker{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:#8a9395;font-weight:700}
+.title{font-family:"Noto Serif SC",serif;font-size:30px;font-weight:900;letter-spacing:-.02em;line-height:1.05;margin-top:2px}
+.subtitle{font-size:12.5px;color:var(--muted);margin-top:5px;max-width:880px;line-height:1.55}
+.controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center}
+.btn,.chip,.zoomBtn,.miniBtn,.eraBtn,.layerBtn{border:0;cursor:pointer;font-family:inherit}
+.btn{padding:9px 14px;border-radius:999px;background:#fff;box-shadow:0 6px 16px rgba(31,41,43,.06);font-size:12.5px;font-weight:800;color:var(--ink);transition:transform .15s,background .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn.active{background:var(--ink2);color:#fff}
+.searchWrap{display:flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:7px 12px;box-shadow:0 6px 16px rgba(31,41,43,.06)}
+.searchWrap input{border:0;outline:0;background:transparent;width:170px;font-size:12.5px}
+.main{position:relative;flex:1;min-height:0;background:rgba(255,255,255,.5);border-radius:30px;box-shadow:var(--shadow);overflow:hidden}
+.sidebar{position:absolute;left:18px;top:18px;bottom:18px;width:228px;background:var(--paper);
+  border-radius:22px;box-shadow:0 10px 24px rgba(30,40,42,.06);padding:14px;overflow:auto;z-index:4}
+.sideTitle{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:#7b8487;margin:0 0 10px;font-weight:800}
+.eraList,.layerList,.quickList{display:grid;gap:6px}
+.eraBtn{background:transparent;border-radius:12px;padding:8px 10px;display:grid;
+  grid-template-columns:auto 1fr;gap:9px;align-items:center;text-align:left;transition:background .15s}
+.eraBtn:hover{background:#fbf7ed}
+.eraBtn.active{background:var(--ink2);color:#fff}
+.eraBtn .dot{width:9px;height:9px;border-radius:50%}
+.eraName{font-size:12px;font-weight:800}
+.eraYears{display:block;font-size:10px;opacity:.7;margin-top:1px}
+.layerBtn,.miniBtn{background:#fff;border-radius:12px;padding:8px 10px;font-size:12px;
+  font-weight:700;color:#4c5b5e;box-shadow:0 4px 10px rgba(31,41,43,.04);text-align:left;transition:transform .12s}
+.layerBtn:hover,.miniBtn:hover{transform:translateX(2px)}
+.layerBtn.active,.miniBtn.active{background:var(--ink2);color:#fff}
+.layerLine{display:inline-block;width:18px;height:3px;border-radius:99px;margin-right:8px;vertical-align:middle}
+.canvas{position:absolute;left:262px;right:18px;top:18px;bottom:18px;border-radius:24px;
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.32));
+  overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.5)}
+.canvas.withPanel{right:430px}
+.view{position:absolute;inset:0;display:none}
+.view.active{display:block}
+.stage{position:absolute;inset:0;overflow:hidden;cursor:grab;user-select:none}
+.stage.dragging{cursor:grabbing}
+.board{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+.geneBoard{width:2400px;height:1300px}
+.geneSvg{position:absolute;left:0;top:0;width:2400px;height:1300px;pointer-events:none}
+.nodeLayer{position:absolute;left:0;top:0;width:2400px;height:1300px}
+.eraBand{position:absolute;top:0;height:100%;border-left:1px dashed rgba(0,0,0,.06)}
+.eraBandLabel{position:absolute;top:8px;left:10px;font-size:10px;letter-spacing:.22em;
+  text-transform:uppercase;color:#9aa2a4;font-weight:800}
+.node{position:absolute;transform:translate(-50%,-50%);border:0;background:transparent;
+  cursor:grab;text-align:center;max-width:130px;
+  transition:opacity .2s ease,filter .2s ease;z-index:1}
+.node.dragging{cursor:grabbing;z-index:6}
+.node:hover .icon{transform:scale(1.06)}
+.node.dim{opacity:.22;filter:saturate(.4)}
+.node.selected{z-index:4}
+.node .icon{margin:0 auto;display:grid;place-items:center;background:#fff;
+  box-shadow:0 10px 22px rgba(31,41,43,.09);position:relative;transition:transform .18s ease,box-shadow .2s}
+.node.person .icon{border-radius:50%}
+.node.institution .icon{border-radius:14px}
+.node.event .icon{border-radius:14px;transform:rotate(45deg)}
+.node.event:hover .icon{transform:rotate(45deg) scale(1.06)}
+.node.event .emoji{transform:rotate(-45deg)}
+.node.concept .icon{border-radius:12px}
+.node.hero .icon{width:84px;height:84px;font-size:34px}
+.node.big .icon{width:66px;height:66px;font-size:28px}
+.node.mid .icon{width:54px;height:54px;font-size:23px}
+.node.small .icon{width:44px;height:44px;font-size:19px}
+.node.selected .icon{box-shadow:0 0 0 5px rgba(109,168,219,.22),0 14px 28px rgba(31,41,43,.16)}
+.label{margin-top:10px;padding:3px 7px;border-radius:8px;background:rgba(255,255,255,.85);
+  font-size:11.5px;font-weight:800;line-height:1.18;display:inline-block}
+.label small{display:block;margin-top:1px;font-size:9.5px;color:#7c8789;font-weight:600}
+.yearBadge{position:absolute;left:50%;bottom:-10px;transform:translateX(-50%);background:#fff;
+  border-radius:999px;padding:2px 7px;font-size:9px;font-weight:800;color:#5a6669;
+  box-shadow:0 3px 10px rgba(0,0,0,.08);white-space:nowrap}
+.legendStrip{position:absolute;left:16px;top:16px;display:flex;gap:7px;flex-wrap:wrap;z-index:3}
+.chip{background:#fff;border-radius:999px;padding:7px 12px;font-size:11px;font-weight:800;
+  color:#576366;box-shadow:0 6px 14px rgba(31,41,43,.05);transition:transform .12s}
+.chip:hover{transform:translateY(-1px)}
+.chip.active{background:var(--ink2);color:#fff}
+.zoomBox{position:absolute;right:16px;bottom:16px;z-index:6;display:flex;gap:7px}
+.zoomBtn{width:36px;height:36px;border-radius:50%;background:#fff;
+  box-shadow:0 8px 18px rgba(31,41,43,.09);font-size:17px;font-weight:900;color:#324144;transition:transform .12s}
+.zoomBtn:hover{transform:translateY(-2px)}
+.panel{position:absolute;right:18px;top:18px;bottom:18px;width:394px;background:var(--paper);
+  border-radius:24px;box-shadow:var(--shadow);overflow:hidden;z-index:5;display:flex;
+  flex-direction:column;transition:width .22s ease, transform .22s ease}
+.panel.closed{width:52px}
+.panelHead{padding:14px 16px 12px;border-bottom:1px solid var(--line);
+  display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+.panel.closed .panelHead{display:block;text-align:center;border-bottom:0;padding-top:18px}
+.panel.closed .panelBody,.panel.closed .panelMeta,.panel.closed h2,.panel.closed .sub{display:none}
+.panelIcon{font-size:32px;line-height:1}
+.panel h2{font-family:"Noto Serif SC",serif;font-size:23px;margin:0;line-height:1.06;font-weight:900}
+.sub{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+.closeBtn{border:0;background:#eef1f0;border-radius:50%;width:30px;height:30px;cursor:pointer;
+  font-weight:900;color:#4d595c;font-size:16px;line-height:1}
+.panelBody{padding:14px 16px 18px;overflow:auto}
+.pill{display:inline-block;padding:5px 10px;border-radius:999px;background:#f7f0da;color:#7b5d10;
+  font-size:11px;font-weight:800}
+.panelMeta{margin:9px 0 0;display:flex;gap:6px;flex-wrap:wrap}
+.metaTag{display:inline-block;background:#f3f6f6;border-radius:999px;padding:4px 9px;font-size:11px;color:#596669}
+.box{background:#fff;border-radius:16px;padding:12px 14px;box-shadow:0 4px 12px rgba(31,41,43,.04);margin-top:11px}
+.boxTitle{display:inline-block;font-size:12px;font-weight:900;color:#1c2a30;
+  border-bottom:3px solid #f2df8f;padding-bottom:2px}
+.box p,.box li{margin:7px 0 0;font-size:13px;line-height:1.62;color:#4d585b}
+.box ul{padding-left:18px;margin:6px 0 0}
+.timeline{margin-top:9px;padding-left:16px;border-left:2px solid #ece2c7}
+.tItem{position:relative;margin:0 0 11px}
+.tItem:before{content:"";position:absolute;left:-22px;top:5px;width:9px;height:9px;border-radius:50%;
+  background:#7ab691;border:2px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.08)}
+.tDate{font-size:11px;font-weight:900;color:#5b676a}
+.tText{font-size:12px;color:#5f6a6c;line-height:1.45;margin-top:1px}
+.toast{position:absolute;left:50%;top:84px;transform:translate(-50%,-6px);background:#fff;
+  padding:8px 14px;border-radius:999px;box-shadow:var(--shadow);font-size:12px;color:#546165;
+  opacity:0;transition:.22s ease;pointer-events:none;z-index:20}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.routePath{fill:none;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.06))}
+.routePath.dim{stroke-width:1.6;stroke-dasharray:6 6;opacity:.22;filter:none}
+.pinCircle{fill:#fff;stroke:rgba(31,41,43,.18);stroke-width:1.4}
+.pinDot{fill:#fff;stroke-width:2}
+.pinLabelBg{fill:rgba(255,255,255,.96);stroke:rgba(0,0,0,.06);stroke-width:1}
+.pinLabel{font-size:11px;font-weight:800;fill:#1d3138}
+.pinYear{font-size:9.5px;fill:#65757a;font-weight:600}
+.routeName{font-size:12px;font-weight:800;fill:#2c5862}
+.leader{stroke:rgba(0,0,0,.25);stroke-width:1;fill:none}
+.graticule{stroke:rgba(255,255,255,.55);stroke-width:.6;fill:none}
+.coast{fill:var(--land);stroke:var(--landEdge);stroke-width:1;stroke-linejoin:round}
+.cityHint{font-size:10.5px;fill:#7a8a8e;font-weight:600;pointer-events:none}
+.oceanLabel{font-size:13px;font-weight:700;fill:rgba(255,255,255,.85);letter-spacing:.18em;text-transform:uppercase}
+.regionLabel{font-size:11px;font-weight:800;fill:rgba(40,60,68,.45);letter-spacing:.14em;text-transform:uppercase}
+
+/* v4: route selector, draggable map labels, clearer layer feedback */
+.routeDock{position:absolute;left:16px;top:58px;z-index:4;width:220px;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-radius:18px;padding:10px;box-shadow:0 10px 24px rgba(31,41,43,.08);display:none}
+#mapView.active .routeDock{display:block}
+.routeDockTitle{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7b8487;font-weight:900;margin:0 0 8px}
+.routeGrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.routePick{border:0;background:#fff;border-radius:12px;padding:7px 8px;font-size:11px;font-weight:800;text-align:left;cursor:pointer;box-shadow:0 4px 10px rgba(31,41,43,.04);transition:background .14s,transform .14s,color .14s}
+.routePick:hover{transform:translateY(-1px)}
+.routePick.active{background:var(--ink2);color:#fff}
+.routeHint{font-size:11px;line-height:1.45;color:#647073;margin-top:8px;background:#f7f4ec;border-radius:12px;padding:7px 8px}
+.labelDrag{cursor:grab}.labelDrag.dragging{cursor:grabbing}
+.layerBtn.inactive{opacity:.42}.layerBtn.active{box-shadow:0 0 0 2px rgba(31,41,43,.05),0 6px 14px rgba(31,41,43,.06)}
+.layerStatus{font-size:10px;opacity:.66;margin-left:4px}
+
+@media (max-width:1360px){
+  .sidebar{width:210px}.canvas{left:240px}.canvas.withPanel{right:404px}.panel{width:368px}.searchWrap input{width:140px}
+}
+</style>
+
+<style id="v6-overrides">
+:root{
+  --bg:#efeee9;
+  --bg2:#f7f7f4;
+  --ink:#17191c;
+  --ink2:#17191c;
+  --muted:#5e6670;
+  --line:#d8dde2;
+  --paper:rgba(255,255,255,.98);
+  --shadow:0 6px 18px rgba(17,24,39,.06);
+  --blue:#486683;
+  --green:#5f7b71;
+  --gold:#7a8c9d;
+  --red:#b56f62;
+  --purple:#7d72a4;
+  --teal:#5d95a2;
+  --slate:#7c8791;
+  --sea:#dfe8ee;
+  --sea2:#d2dde5;
+  --land:#ece9e2;
+  --landEdge:#b4bac1;
+}
+html,body{
+  font-family:Inter,"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif!important;
+  background:linear-gradient(180deg,#f2f1ec,#eceae4)!important;
+}
+body:before{display:none!important}
+.title,.kicker,.subtitle,.sideTitle,.boxTitle,.eraName,.label,.panel h2,.sub,.metaTag,.pill,.btn,.chip,.routePick,.layerBtn,.eraBtn,.panelBody,.panelHead,.routeDockTitle,.routeHint,.searchWrap input{
+  font-family:Inter,"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif!important;
+}
+.title{
+  font-size:30px!important;
+  font-weight:900!important;
+  letter-spacing:-.03em!important;
+  line-height:1.04!important;
+}
+.subtitle{font-size:13px!important;color:#606873!important;max-width:930px!important;line-height:1.55!important}
+.kicker,.sideTitle,.routeDockTitle{font-weight:800!important;color:#69727c!important;letter-spacing:.18em!important}
+.top,.main,.sidebar,.canvas,.panel,.routeDock,.searchWrap,.btn,.chip,.zoomBtn,.layerBtn,.eraBtn,.routePick,.pill,.metaTag,.box{
+  border-radius:12px!important;
+}
+.top,.main,.sidebar,.canvas,.panel,.routeDock{
+  backdrop-filter:none!important;
+  border:1px solid rgba(17,24,39,.06)!important;
+  box-shadow:var(--shadow)!important;
+}
+.top{background:rgba(255,255,255,.95)!important;padding:18px 24px!important;min-height:94px!important}
+.main{background:rgba(255,255,255,.48)!important}
+.sidebar{background:#f8f8f6!important;box-shadow:none!important}
+.canvas{background:#fcfcfb!important;box-shadow:inset 0 0 0 1px rgba(17,24,39,.04)!important}
+.panel{background:#fff!important}
+.btn,.chip,.zoomBtn,.layerBtn,.eraBtn,.routePick,.searchWrap{
+  border:1px solid var(--line)!important;
+  box-shadow:none!important;
+  background:#fff!important;
+}
+.btn.active,.chip.active,.routePick.active,.layerBtn.active,.eraBtn.active{
+  background:#111315!important;color:#fff!important;border-color:#111315!important;
+}
+.zoomBtn{background:#fff!important;color:#111!important}
+.searchWrap{padding:9px 12px!important}
+.searchWrap input{font-size:13px!important}
+.searchWrap input::placeholder{color:#8a9198}
+.eraBtn{padding:10px 12px!important}
+.eraBtn:hover,.layerBtn:hover,.routePick:hover,.btn:hover{transform:none!important}
+.eraBtn .dot{width:10px!important;height:10px!important}
+.layerBtn,.routePick{font-weight:800!important}
+.layerBtn.active{box-shadow:none!important}
+.panelHead{padding:16px 18px 14px!important;border-bottom:1px solid var(--line)!important}
+.panel h2{font-size:24px!important;color:#111315!important;margin:0!important}
+.sub{font-size:13px!important;color:#66717a!important}
+.closeBtn{background:#f3f5f6!important;color:#222!important}
+.pill{background:#eef2f6!important;color:#243544!important;padding:5px 10px!important;font-weight:800!important;border:1px solid #e0e7ed!important;box-shadow:none!important}
+.metaTag{background:#f5f6f7!important;color:#51606d!important;padding:4px 8px!important;border:1px solid #e3e7eb!important}
+.box{
+  background:transparent!important;
+  border:1px solid #e3e7eb!important;
+  border-left:4px solid #b7c5d2!important;
+  box-shadow:none!important;
+  padding:14px 16px!important;
+  margin-top:12px!important;
+}
+.boxTitle{
+  display:block!important;
+  font-size:13px!important;
+  font-weight:900!important;
+  color:#111315!important;
+  border-bottom:none!important;
+  padding-bottom:0!important;
+  letter-spacing:0!important;
+}
+.boxTitle::after{
+  content:"";
+  display:block;
+  width:44px;
+  height:2px;
+  background:#aebdcb;
+  margin-top:6px;
+}
+.box p,.box li,.tText{font-size:13.5px!important;line-height:1.72!important;color:#2f363d!important}
+.timeline{margin-top:10px!important;padding-left:16px!important;border-left:2px solid #d8dde2!important}
+.tItem:before{left:-22px!important;background:#6f808d!important;border:2px solid #fff!important;box-shadow:none!important}
+.tDate{font-size:11px!important;color:#51606d!important}
+.node .icon{background:#fff!important;box-shadow:0 5px 16px rgba(17,24,39,.08)!important}
+.node.selected .icon{box-shadow:0 0 0 5px rgba(72,102,131,.12),0 7px 18px rgba(17,24,39,.12)!important}
+.label{
+  background:rgba(255,255,255,.96)!important;
+  border:1px solid rgba(17,24,39,.08)!important;
+  border-radius:6px!important;
+  padding:4px 8px!important;
+  box-shadow:none!important;
+  color:#111315!important;
+}
+.label small{color:#6e7881!important;font-weight:700!important}
+.yearBadge{background:#111315!important;color:#fff!important;border-radius:6px!important;box-shadow:none!important}
+.routeDock{
+  left:auto!important;
+  right:16px!important;
+  top:66px!important;
+  width:214px!important;
+  background:rgba(255,255,255,.98)!important;
+  padding:12px!important;
+}
+.routeGrid{grid-template-columns:1fr 1fr!important;gap:8px!important}
+.routePick{padding:9px 10px!important;border-radius:10px!important;font-size:12px!important}
+.routeHint{
+  font-size:11px!important;
+  line-height:1.5!important;
+  color:#5f6c77!important;
+  margin-top:10px!important;
+  background:transparent!important;
+  border:1px dashed #d8dde2!important;
+  border-radius:8px!important;
+  padding:8px 9px!important;
+}
+.pinLabelBg{fill:rgba(255,255,255,.98)!important;stroke:rgba(17,24,39,.12)!important;stroke-width:1!important}
+.pinLabel{font-size:11px!important;font-weight:800!important;fill:#111315!important}
+.pinYear{font-size:10px!important;fill:#5d6771!important}
+.leader{stroke:#8fa1af!important;stroke-width:1.1!important;stroke-dasharray:0!important}
+.cityHint{font-size:10px!important;fill:#78838d!important}
+.graticule{stroke:#dbe1e7!important;stroke-width:1!important}
+.coast{stroke:rgba(95,102,110,.35)!important;stroke-width:1!important}
+.oceanLabel{font-size:12px!important;fill:#8694a0!important;letter-spacing:.16em!important}
+.regionLabel{font-size:11px!important;font-weight:900!important;fill:#56616b!important;letter-spacing:.12em!important}
+.footerHint,.noteCard{display:none!important}
+@media (max-width:1360px){
+  .routeDock{width:190px!important}
+}
+</style>
+
+
+<style id="v7-final-overrides">
+:root{
+  --bg:#ffffff;
+  --bg2:#ffffff;
+  --ink:#111111;
+  --ink2:#111111;
+  --muted:#5f6368;
+  --line:#d9dfe5;
+  --paper:#ffffff;
+  --shadow:none;
+  --blue:#465EFB;
+  --green:#28a86d;
+  --gold:#667085;
+  --red:#b4534b;
+  --purple:#635bff;
+  --teal:#238ca2;
+  --slate:#6b7280;
+}
+html,body{
+  background:#ffffff!important;
+  color:#111!important;
+  font-family:Inter,"Noto Sans SC","PingFang SC","Microsoft YaHei",Arial,sans-serif!important;
+}
+body:before{display:none!important}
+*{scrollbar-color:#a7adb4 transparent;}
+.app{padding:18px!important;gap:18px!important;background:#fff!important}
+.top,.main,.sidebar,.canvas,.panel,.routeDock,.box,.infoBlock,.pill,.metaTag,.searchWrap,.btn,.chip,.zoomBtn,.layerBtn,.eraBtn,.routePick,.closeBtn{
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+.top{
+  min-height:96px!important;
+  border:0!important;
+  border-bottom:1px solid #d9dfe5!important;
+  padding:0 0 18px 0!important;
+}
+.main{
+  border:0!important;
+  background:#fff!important;
+}
+.sidebar{
+  left:0!important;top:0!important;bottom:0!important;
+  width:260px!important;
+  padding:22px 24px 22px 0!important;
+  border:0!important;
+  border-right:1px solid #d9dfe5!important;
+  background:#fff!important;
+}
+.canvas{
+  left:286px!important;right:0!important;top:0!important;bottom:0!important;
+  border:0!important;
+  background:#fff!important;
+  overflow:hidden!important;
+}
+.canvas.withPanel{right:420px!important}
+.panel{
+  right:0!important;top:0!important;bottom:0!important;width:390px!important;
+  border:0!important;
+  border-left:1px solid #d9dfe5!important;
+  background:#fff!important;
+}
+.panel.closed{width:48px!important}
+.title{
+  font-family:Inter,"Noto Sans SC","PingFang SC","Microsoft YaHei",Arial,sans-serif!important;
+  font-size:32px!important;
+  font-weight:900!important;
+  letter-spacing:-.035em!important;
+}
+.kicker{font-size:11px!important;letter-spacing:.28em!important;color:#5d6673!important;font-weight:800!important}
+.subtitle{font-size:13px!important;color:#4f5965!important;line-height:1.55!important;max-width:920px!important}
+.controls{gap:2px!important}
+.btn{
+  padding:11px 14px!important;
+  border:0!important;
+  border-bottom:2px solid transparent!important;
+  font-size:13px!important;
+  font-weight:850!important;
+  color:#111!important;
+}
+.btn.active{color:#465EFB!important;border-bottom-color:#465EFB!important;background:transparent!important}
+.searchWrap{border:0!important;border-bottom:1px solid #d9dfe5!important;padding:9px 4px!important;margin-left:12px!important}
+.searchWrap input{font-size:13px!important;color:#111!important}
+.sideTitle,.routeDockTitle{
+  color:#111!important;
+  letter-spacing:.18em!important;
+  font-size:11px!important;
+  font-weight:900!important;
+  margin-bottom:14px!important;
+}
+.eraList,.layerList{gap:0!important}
+.eraBtn,.layerBtn{
+  border:0!important;
+  border-bottom:1px solid #eef1f4!important;
+  padding:13px 0!important;
+  color:#111!important;
+}
+.eraBtn.active,.layerBtn.active{background:transparent!important;color:#465EFB!important}
+.eraBtn .dot{width:9px!important;height:9px!important}
+.eraName{font-size:13px!important;font-weight:850!important}
+.eraYears{font-size:11px!important;color:#6b7280!important;opacity:1!important}
+.layerLine{height:2px!important;border-radius:0!important;width:22px!important}
+.layerStatus{font-size:10px!important;color:#6b7280!important}
+.chip{
+  border:0!important;
+  border-bottom:1px solid transparent!important;
+  padding:7px 0!important;
+  margin-right:18px!important;
+  font-size:13px!important;
+  font-weight:850!important;
+  color:#111!important;
+}
+.chip.active{background:transparent!important;color:#465EFB!important;border-bottom-color:#465EFB!important}
+.legendStrip{left:24px!important;top:20px!important;gap:0!important}
+.zoomBox{right:24px!important;bottom:24px!important;gap:10px!important}
+.zoomBtn{
+  border:1px solid #d9dfe5!important;
+  width:38px!important;height:38px!important;
+  font-size:18px!important;
+  color:#111!important;
+  background:#fff!important;
+}
+.node .icon{
+  background:#fff!important;
+  border-radius:50%!important;
+  box-shadow:none!important;
+  border-width:2px!important;
+}
+.node.institution .icon,.node.concept .icon,.node.event .icon{border-radius:0!important;transform:none!important}
+.node.event .emoji{transform:none!important}
+.node.selected .icon{box-shadow:0 0 0 4px rgba(70,94,251,.18)!important}
+.node.dim{opacity:.28!important}
+.label{
+  background:transparent!important;
+  border:0!important;
+  padding:5px 0!important;
+  color:#111!important;
+}
+.label small{color:#69717b!important}
+.yearBadge{background:#111!important;color:#fff!important;border-radius:0!important;padding:3px 6px!important}
+.panelHead{
+  padding:0 0 18px 24px!important;
+  margin:22px 24px 0 0!important;
+  border-bottom:1px solid #d9dfe5!important;
+}
+.panelIcon{font-size:31px!important}
+.panel h2{font-size:28px!important;font-weight:900!important;color:#111!important}
+.sub{font-size:13px!important;color:#5f6874!important}
+.closeBtn{width:30px!important;height:30px!important;border:0!important;color:#111!important;background:transparent!important;font-size:22px!important}
+.panelBody{padding:18px 24px 26px 24px!important}
+.pill{
+  display:block!important;
+  border:0!important;
+  color:#465EFB!important;
+  font-weight:900!important;
+  padding:0!important;
+  margin:0 0 12px 0!important;
+}
+.panelMeta{gap:8px!important;margin:8px 0 6px!important}
+.metaTag{border:0!important;background:transparent!important;color:#68727e!important;padding:0!important;font-size:12px!important}
+.metaTag:not(:last-child)::after{content:" / ";color:#a5adb7;margin-left:8px;}
+.box,.infoBlock{
+  border:0!important;
+  border-top:1px solid #d9dfe5!important;
+  padding:17px 0 0 0!important;
+  margin:18px 0 0 0!important;
+  background:transparent!important;
+}
+.boxTitle,.infoBlock h3{
+  display:block!important;
+  margin:0 0 10px 0!important;
+  font-family:Inter,"Noto Sans SC","PingFang SC","Microsoft YaHei",Arial,sans-serif!important;
+  font-size:14px!important;
+  font-weight:900!important;
+  color:#111!important;
+  letter-spacing:0!important;
+  border:0!important;
+}
+.boxTitle::after,.infoBlock h3::after{display:none!important}
+.box p,.box li,.infoBlock p,.tText{
+  font-size:14px!important;
+  line-height:1.78!important;
+  color:#24292f!important;
+}
+ul{padding-left:18px!important}
+.timeline{border-left:1px solid #d9dfe5!important;padding-left:14px!important;margin-top:12px!important}
+.tItem{margin-bottom:13px!important}
+.tItem:before{display:none!important}
+.tDate{font-size:11px!important;font-weight:900!important;color:#465EFB!important;margin-bottom:2px!important}
+.routeDock{
+  right:22px!important;top:66px!important;width:210px!important;
+  border:0!important;
+  padding:0!important;
+  background:transparent!important;
+}
+.routeGrid{display:block!important}
+.routePick{
+  display:block!important;
+  width:100%!important;
+  text-align:left!important;
+  border:0!important;
+  border-bottom:1px solid #d9dfe5!important;
+  padding:8px 0!important;
+  font-size:12px!important;
+  color:#111!important;
+}
+.routePick.active{background:transparent!important;color:#465EFB!important;border-bottom-color:#465EFB!important}
+.routeHint{display:none!important}
+.pinLabelBg{display:none!important}
+.pinLabel{font-size:12px!important;font-weight:900!important;fill:#111!important}
+.pinYear{font-size:10.5px!important;fill:#4e5a66!important}
+.leader{stroke:#465EFB!important;stroke-width:1.1!important;stroke-dasharray:3 4!important;opacity:.6!important}
+.graticule{stroke:#e9edf2!important;stroke-width:.8!important}
+.coast{stroke:rgba(17,17,17,.22)!important;stroke-width:1!important}
+.oceanLabel,.regionLabel{fill:#111!important;opacity:.52!important}
+.cityHint{fill:#111!important;opacity:.52!important}
+</style>
+
+
+<style id="v8-overrides">
+/* v8: clean exhibition-style corrections */
+#focusAtlanticBtn,#focusUSEastBtn{display:none!important}
+.main.mapMode .sidebar{display:none!important}
+.main.mapMode .canvas{left:18px!important;right:18px!important}
+.main.mapMode .panel{display:none!important}
+.canvas{border-radius:0!important;box-shadow:none!important;border-left:1px solid #e3e7eb!important;border-right:1px solid #e3e7eb!important;background:#fff!important}
+.node{max-width:170px!important}
+.node .icon{border:none!important;border-radius:50%!important;background:#fff!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:2px!important;box-shadow:0 6px 18px rgba(17,24,39,.10)!important}
+.node.event .icon,.node.institution .icon,.node.concept .icon{border-radius:50%!important;transform:none!important}
+.node.event:hover .icon{transform:scale(1.05)!important}
+.node.event .emoji{transform:none!important}
+.node.hero .icon{width:104px!important;height:104px!important}.node.hero .emoji{font-size:42px!important}
+.node.big .icon{width:82px!important;height:82px!important}.node.big .emoji{font-size:34px!important}
+.node.mid .icon{width:70px!important;height:70px!important}.node.mid .emoji{font-size:30px!important}
+.node.small .icon{width:60px!important;height:60px!important}.node.small .emoji{font-size:25px!important}
+.yearBadge{position:static!important;left:auto!important;bottom:auto!important;transform:none!important;background:transparent!important;color:#111315!important;border-radius:0!important;padding:0!important;box-shadow:none!important;font-size:10.5px!important;font-weight:900!important;line-height:1!important;white-space:nowrap!important}
+.label{font-size:14px!important;font-weight:900!important;background:transparent!important;border:none!important;padding:0!important;margin-top:9px!important;border-radius:0!important;line-height:1.18!important;color:#111315!important;text-shadow:0 1px 0 rgba(255,255,255,.72)!important}
+.label small{font-size:11px!important;margin-top:4px!important;color:#56616b!important;font-weight:750!important;text-shadow:0 1px 0 rgba(255,255,255,.72)!important}
+.node.selected .icon{box-shadow:0 0 0 3px rgba(70,94,251,.22),0 8px 20px rgba(17,24,39,.14)!important}
+.geneSvg path{stroke-width:2.1!important}.geneSvg path[opacity=".95"]{stroke-width:3.2!important}
+.regionLabel{font-size:12px!important;font-weight:900!important;fill:#28323d!important;opacity:.78!important}
+.cityHint{font-size:10.5px!important;fill:#4e5965!important;opacity:.72!important}
+.coast{stroke:none!important}
+.routePath{stroke-width:3.5!important}.routePath.dim{stroke-width:2.2!important;opacity:.30!important}
+.leader{stroke:#8fa1af!important;stroke-width:1!important;stroke-dasharray:4 4!important}
+.routeDock{right:20px!important;top:78px!important;width:210px!important;background:rgba(255,255,255,.86)!important;border-left:1px solid #d8dde2!important;padding-left:18px!important}
+.routeGrid{grid-template-columns:1fr!important;gap:0!important}
+.routePick{border:0!important;border-bottom:1px solid #d8dde2!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:10px 0!important;font-size:15px!important;font-weight:900!important}
+.routePick.active{background:transparent!important;color:#465EFB!important;text-decoration:underline!important;text-underline-offset:6px!important}
+.routeHint{display:none!important}
+.mapSvg .pinLabel{font-size:12px!important}.mapSvg .pinYear{font-size:10.8px!important}
+</style>
+
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div>
+      <div class="kicker">COLUMBIA · SOCIOLOGY ATLAS</div>
+      <div class="title">哥大社会学知识地图</div>
+      <div class="subtitle">百年兴衰·当代重构</div>
+    </div>
+    <div class="controls">
+      <button class="btn active" data-mode="gene">谱系图</button>
+      <button class="btn" data-mode="debate">争论</button>
+      <button class="btn" data-mode="ma">MA 项目</button>
+      <button class="btn" data-mode="map">迁徙地图</button>
+      <div class="searchWrap"><span style="opacity:.6">⌕</span><input id="searchInput" type="text" placeholder="搜索人物 / 机构"/></div>
+    </div>
+  </header>
+
+  <main class="main" id="main">
+    <div class="toast" id="toast">已更新</div>
+    <aside class="sidebar">
+      <h3 class="sideTitle">时代</h3>
+      <div class="eraList" id="eraList"></div>
+
+      <div style="margin-top:14px">
+        <h3 class="sideTitle">关系图层</h3>
+        <div class="layerList" id="layerList"></div>
+      </div>
+    </aside>
+
+    <section class="canvas withPanel" id="canvas">
+      <div class="view active" id="geneView">
+        <div class="legendStrip" id="legendStrip"></div>
+        <div class="stage" id="geneStage">
+          <div class="board geneBoard" id="geneBoard">
+            <svg class="geneSvg" viewBox="0 0 2400 1300" id="geneSvg"></svg>
+            <div class="nodeLayer" id="nodeLayer"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="view" id="mapView">
+        <div class="legendStrip">
+          <button class="chip active" id="singleRouteBtn">仅当前路线</button>
+          <button class="chip" id="contextRouteBtn">显示全部路线</button>
+          <button class="chip" id="focusAtlanticBtn">大西洋两岸</button>
+          <button class="chip" id="focusUSEastBtn">美国东北</button>
+        </div>
+        <div class="routeDock" id="routeDock">
+          <div class="routeDockTitle">选择迁徙路线</div>
+          <div class="routeGrid" id="routeGrid"></div>
+          <div class="routeHint">标签可拖拽调整位置；路线箭头表示知识迁移方向。</div>
+        </div>
+        <div class="stage" id="mapStage">
+          <div class="board mapBoard" id="mapBoard" style="width:1600px;height:920px">
+            <svg class="mapSvg" viewBox="0 0 1600 920" id="mapSvg" style="width:1600px;height:920px"></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="zoomBox">
+        <button class="zoomBtn" id="zoomIn" title="放大">+</button>
+        <button class="zoomBtn" id="zoomOut" title="缩小">−</button>
+        <button class="zoomBtn" id="zoomHome" title="回到全图">⌂</button>
+      </div>
+    </section>
+
+    <aside class="panel" id="panel"></aside>
+  </main>
+</div>
+
+<script>
+/* =========================================================
+   数据：时代、图层、节点、关系、迁徙路线
+   ========================================================= */
+const eras = [
+  {id:'all',          name:'总图',   years:'1894–2026', color:'#97a1a7'},
+  {id:'founding',     name:'创世纪', years:'1894–1929', color:'#d5aa53'},
+  {id:'transition',   name:'过渡',   years:'1929–1941', color:'#a894d3'},
+  {id:'golden',       name:'黄金时代', years:'1941–1970', color:'#6da8db'},
+  {id:'decline',      name:'中衰',   years:'1970–1988', color:'#dc8b76'},
+  {id:'rebirth',      name:'重生',   years:'1988–2010', color:'#7eb690'},
+  {id:'contemporary', name:'当代',   years:'2010–2026', color:'#7ab5bc'}
+];
+
+const layerMeta = [
+  {id:'institution', label:'机构线',   color:'#7eb690'},
+  {id:'mentor',      label:'师承线',   color:'#6da8db'},
+  {id:'debate',      label:'争论线',   color:'#dc8b76'},
+  {id:'legacy',      label:'继承 / 外溢', color:'#7ab5bc'},
+  {id:'ma',          label:'MA 转译线', color:'#d5aa53'}
+];
+
+/* 按时代分列：创世(220) 过渡(500) 黄金(900) 中衰(1340) 重生(1700) 当代(2080) */
+const nodes = [
+  {
+    "id": "chair1894",
+    "group": "event",
+    "size": "small",
+    "era": "founding",
+    "year": "1894",
+    "x": 170,
+    "y": 680,
+    "icon": "📍",
+    "label": "1894 讲席",
+    "sub": "美国首个社会学讲席",
+    "summary": "这是哥大社会学的制度起点。1894 年，哥大设立美国第一个以 sociology 为名的正式讲席，社会学由此从改革者、牧师、统计员和道德哲学家的讨论，进入研究型大学的职位体系。",
+    "changed": "它首先改变的是合法性。社会学不再只是讨论贫困、移民、城市和阶级问题的公共话语，而成为可以聘教授、招学生、设课程、授学位的大学学科。",
+    "conflict": "这个起点也带有竞争性。芝加哥大学和 Johns Hopkins 都在推动新式研究型大学，谁能先把社会学制度化，谁就能定义美国社会学的早期形象。",
+    "legacy": "后来的哥大故事都从这里开始。没有讲席和系所建制，就不会有 Giddings 的统计社会学，也不会有 Lazarsfeld 和 BASR 所代表的大规模研究组织。",
+    "keywords": [
+      "建制",
+      "学科合法性",
+      "研究型大学"
+    ],
+    "timeline": [
+      [
+        "1894",
+        "哥大设立美国首个 sociology 讲席"
+      ],
+      [
+        "1904",
+        "独立社会学系成形，学科开始稳定招生和训练"
+      ]
+    ]
+  },
+  {
+    "id": "giddings",
+    "group": "person",
+    "size": "mid",
+    "era": "founding",
+    "year": "1894",
+    "x": 280,
+    "y": 560,
+    "icon": "🧮",
+    "label": "吉丁斯",
+    "sub": "Franklin H. Giddings",
+    "summary": "Giddings 是哥大社会学的第一代奠基者。他相信社会学要成为科学，就必须把社会关系、群体相似性和集体意识转化为可分类、可比较、可统计的对象。",
+    "changed": "他改变的是证据标准。早期社会学很容易停留在道德评论和社会改革宣言，Giddings 则把统计、分类和归纳推到中心位置，让哥大很早就带有经验化和量化倾向。",
+    "conflict": "他的局限也很明显。为了获得科学性，他倾向于把复杂的历史经验压缩为类别、指标和规律。这个传统后来会被 Lazarsfeld 放大，也会被 Mills 一类批评者质疑。",
+    "legacy": "Giddings 留下的不是一套今天仍被完整继承的理论，而是一种更深的取向：社会学必须有系统证据，必须能把社会现象组织成可研究的问题。",
+    "keywords": [
+      "统计社会学",
+      "同类意识",
+      "经验化"
+    ],
+    "timeline": [
+      [
+        "1894",
+        "出任哥大 sociology 讲席教授"
+      ],
+      [
+        "1904",
+        "推动独立建系"
+      ],
+      [
+        "1928",
+        "当选 American Sociological Society 主席"
+      ],
+      [
+        "1931",
+        "去世，第一代哥大社会学结束"
+      ]
+    ]
+  },
+  {
+    "id": "dept",
+    "group": "institution",
+    "size": "small",
+    "era": "founding",
+    "year": "1904",
+    "x": 280,
+    "y": 820,
+    "icon": "🏛️",
+    "label": "社会学系创立",
+    "sub": "Department of Sociology",
+    "summary": "哥大社会学系像一只容器，不同时代的人把不同的研究风格、资金来源、训练方式和学术理想装进来。",
+    "changed": "它改变了知识生产的尺度。个人可以写书，但系所可以连续招生、培养博士、任命教员、吸收资金、形成传统。学科史因此从个人观点变成组织史。",
+    "conflict": "同一个系从来不只有一种灵魂。Giddings 的统计科学、MacIver 的理论社会学、Lynd 的公共实践、拉扎斯菲尔德主导的BASR行政研究、White 的关系社会学，都在争夺它的方向。",
+    "legacy": "读哥大社会学，关键是看同一个系如何反复回答：社会学应该研究什么，怎样研究，为谁生产知识。",
+    "keywords": [
+      "系所",
+      "制度容器",
+      "知识机器"
+    ],
+    "timeline": [
+      [
+        "1904",
+        "独立社会学系建立"
+      ],
+      [
+        "1944",
+        "与 BASR 深度耦合"
+      ],
+      [
+        "1988",
+        "White 到来，系所开始重建"
+      ],
+      [
+        "2011 后",
+        "MA 项目运行进一步制度化"
+      ]
+    ]
+  },
+  {
+    "id": "maciver",
+    "group": "person",
+    "size": "mid",
+    "era": "transition",
+    "year": "1929",
+    "x": 540,
+    "y": 380,
+    "icon": "📚",
+    "label": "麦基弗",
+    "sub": "Robert M. MacIver",
+    "summary": "MacIver 是哥大从 Giddings 时代走向黄金时代之间的理论桥梁。他把欧陆社会理论、共同体问题和国家与社会关系带入哥大，使社会学不只是统计技术。",
+    "changed": "他补上了理论语言。社会学不能只收集数据，还要解释社会秩序如何形成，个人如何嵌入共同体，国家、协会和社会结构之间如何相互作用。",
+    "conflict": "他的风格与 Lynd 的实践取向不同。MacIver 更重理论和概念秩序，Lynd 更关心知识如何服务公共问题。这种张力预示了后来理论、方法与实践之间的长期拉扯。",
+    "legacy": "MacIver 的作用不是让哥大保留了理论深度。理解他，才能避免把哥大误读成一条单纯量化路线。",
+    "keywords": [
+      "理论社会学",
+      "共同体",
+      "国家与社会"
+    ],
+    "timeline": [
+      [
+        "1929",
+        "进入 Lazarsfeld 周围的研究生态，理论与方法结合本部社会学系"
+      ],
+      [
+        "1931",
+        "出版 Society: Its Structure and Changes"
+      ],
+      [
+        "1944",
+        "辞去系主任职务"
+      ],
+      [
+        "1970",
+        "去世"
+      ]
+    ]
+  },
+  {
+    "id": "lynd",
+    "group": "person",
+    "size": "mid",
+    "era": "transition",
+    "year": "1931",
+    "x": 540,
+    "y": 780,
+    "icon": "📰",
+    "label": "林德",
+    "sub": "Robert S. Lynd",
+    "summary": "Lynd 代表哥大另一条根系：社会学不应只追求优雅理论，也要面对美国社会中的阶级、消费、信仰、城市生活和公共决策。",
+    "changed": "他改变的是社会学的公共取向。Middletown 研究把一个普通美国城镇变成理解现代生活的窗口，Knowledge for What? 更直接追问知识到底服务谁。",
+    "conflict": "Lynd 对脱离现实的学院知识保持怀疑，但他也需要大学制度、基金会和研究组织来实现自己的公共抱负。这个矛盾后来会在 BASR 身上变得更明显。",
+    "legacy": "他是 Lazarsfeld 进入哥大的关键中介。没有 Lynd 的实践社会学传统，Lazarsfeld 的调查机器很难在哥大获得同样的制度空间。",
+    "keywords": [
+      "Middletown",
+      "公共社会学",
+      "实践取向"
+    ],
+    "timeline": [
+      [
+        "1929",
+        "与 Helen Lynd 出版 Middletown"
+      ],
+      [
+        "1931",
+        "获博士并留在哥大"
+      ],
+      [
+        "1939",
+        "出版 Knowledge for What?"
+      ],
+      [
+        "1940",
+        "推动 Lazarsfeld 进入哥大"
+      ],
+      [
+        "1970",
+        "去世"
+      ]
+    ]
+  },
+  {
+    "id": "adorno",
+    "group": "person",
+    "size": "small",
+    "era": "golden",
+    "year": "1938–1940",
+    "x": 880,
+    "y": 170,
+    "icon": "🎧",
+    "label": "阿多诺",
+    "sub": "Theodor Adorno",
+    "summary": "Adorno 和 Lazarsfeld 的短暂合作失败，暴露了现代社会研究内部最根本的分歧。",
+    "changed": "他把问题推到方法背后：研究听众和文化产品，究竟是为了帮助广播业更有效地管理受众，还是为了批判文化工业如何塑造人的感知和欲望。",
+    "conflict": "Adorno 无法接受把音乐、审美和意识形态简化为受众偏好与传播效果。Lazarsfeld 则需要可操作、可资助、可交付的研究结果。双方不是性格不合，而是知识制度不合。",
+    "legacy": "这场失败后来成为传播研究的经典分裂：administrative research 行政研究与 critical research批判研究。后来拉扎斯菲尔德也撰文讨论了这一分裂，但他认为两者不应该完全对立，而应该相互补充。",
+    "keywords": [
+      "批判理论",
+      "文化工业",
+      "行政研究"
+    ],
+    "timeline": [
+      [
+        "1938",
+        "进入广播研究项目网络"
+      ],
+      [
+        "1940",
+        "与项目体系决裂并离开"
+      ],
+      [
+        "1944",
+        "《启蒙辩证法》相关思想成形，批判理论影响扩大"
+      ]
+    ]
+  },
+  {
+    "id": "lazarsfeld",
+    "group": "person",
+    "size": "hero",
+    "era": "golden",
+    "year": "1939 / 41",
+    "x": 920,
+    "y": 520,
+    "icon": "📊",
+    "label": "拉扎斯菲尔德",
+    "sub": "Paul F. Lazarsfeld",
+    "summary": "Lazarsfeld 是哥大黄金时代的组织建筑师。他的核心贡献不是某一个概念，而是把社会学改造成可以接项目、拿资助、训练研究助理、生产报告和论文的研究工业。",
+    "changed": "他改变了社会学的生产方式。选举、广播、消费和舆论这些模糊现象，被拆成样本、问卷、变量、编码、访谈和统计表。研究从个人写作变成团队流程。",
+    "conflict": "这台机器非常高效，但也因此被批评为太接近政府、基金会、媒体和商业客户的需求。问题不只是量化，而是社会学是否会把权力问题翻译成管理问题。",
+    "legacy": "BASR、传播效果研究、博士学徒制、两级传播等传统，都和他有关。哥大的黄金时代不是因为有一个天才，而是因为他搭出了一套能持续复制人才和成果的系统。",
+    "keywords": [
+      "调查研究",
+      "BASR",
+      "传播研究",
+      "学术企业家"
+    ],
+    "timeline": [
+      [
+        "1933",
+        "滞留美国，开始进入美国学术与基金网络"
+      ],
+      [
+        "1937–1939",
+        "主持 Princeton Radio Research Project"
+      ],
+      [
+        "1939",
+        "将项目迁入哥大"
+      ],
+      [
+        "1941",
+        "正式进入 Lazarsfeld 周围的研究生态，理论与方法结合"
+      ],
+      [
+        "1944",
+        "建立 BASR"
+      ],
+      [
+        "1962",
+        "任 ASA 主席"
+      ],
+      [
+        "1976",
+        "去世，BASR 失去核心人物"
+      ]
+    ]
+  },
+  {
+    "id": "merton",
+    "group": "person",
+    "size": "big",
+    "era": "golden",
+    "year": "1941",
+    "x": 920,
+    "y": 780,
+    "icon": "🧠",
+    "label": "默顿",
+    "sub": "Robert K. Merton",
+    "summary": "Merton 是 Lazarsfeld 机器中的理论发动机。他让哥大不只是会做调查，还能提出可被经验研究推进的概念，如中层理论、非预期后果、自我实现预言、参考群体和科学规范。",
+    "changed": "他改变了理论的位置。理论既不必成为包打天下的宏大体系，也不能只是数据之后的装饰。中层理论让概念和证据之间形成可循环的关系。",
+    "conflict": "Mills 批评这种学术体制会变成抽象经验主义，沉迷可测量的问题，失去历史结构感。这个批评并非完全否定 Merton，而是指出黄金时代的盲点。",
+    "legacy": "今天如果要理解哥大 MA 的研究训练，Merton 很关键。一个好题目不只是有兴趣，也要能把理论概念、文献缝隙和经验材料组织到一起。",
+    "keywords": [
+      "中层理论",
+      "科学社会学",
+      "经验与理论"
+    ],
+    "timeline": [
+      [
+        "1941",
+        "进入 Lazarsfeld 周围的研究生态，理论与方法结合"
+      ],
+      [
+        "1949",
+        "出版 Social Theory and Social Structure"
+      ],
+      [
+        "1957",
+        "任 ASA 主席"
+      ],
+      [
+        "1994",
+        "获美国国家科学奖章"
+      ],
+      [
+        "2003",
+        "去世"
+      ]
+    ]
+  },
+  {
+    "id": "basr",
+    "group": "institution",
+    "size": "big",
+    "era": "golden",
+    "year": "1944–77",
+    "x": 1140,
+    "y": 560,
+    "icon": "🏢",
+    "label": "BASR",
+    "sub": "Bureau of Applied Social Research",
+    "summary": "BASR 是哥大黄金时代的真正发动机。它不是普通研究中心，而是一套把资金、项目、学生、方法和论文生产连接起来的社会科学工厂。",
+    "changed": "它改变了大学研究的组织形式。研究不再只是教授一个人在书房写作，而是由主任、项目负责人、研究助理、访员、统计员和博士生共同完成。",
+    "conflict": "BASR 的强大来自外部资助和项目制，也受制于它们。只要资助环境、城市财政、学术风向和核心人物发生变化，这台机器就可能迅速失速。",
+    "legacy": "理解 BASR，才能理解为什么哥大一度不是某个方向强，而是能批量生产方法、项目和学术明星。它也是后来 MA 研究训练和项目制想象的重要历史背景。",
+    "keywords": [
+      "研究工厂",
+      "项目制",
+      "博士学徒制"
+    ],
+    "timeline": [
+      [
+        "1944",
+        "BASR 正式建立"
+      ],
+      [
+        "1950s–1960s",
+        "成为战后美国社会研究的核心平台之一"
+      ],
+      [
+        "1976",
+        "Lazarsfeld 去世"
+      ],
+      [
+        "1977",
+        "BASR 关闭，黄金时代的组织核心瓦解"
+      ]
+    ]
+  },
+  {
+    "id": "mills",
+    "group": "person",
+    "size": "mid",
+    "era": "golden",
+    "year": "1959",
+    "x": 1140,
+    "y": 1010,
+    "icon": "🔥",
+    "label": "米尔斯",
+    "sub": "C. Wright Mills",
+    "summary": "Mills 是哥大黄金时代内部最有力量的异议者。他不是站在外部骂哥大，而是在哥大这台机器内部，指出技术化社会学正在失去公共判断力。",
+    "changed": "他重新定义了入门社会学最重要的能力：把个人困境连接到公共议题，把个人生活放回历史结构和权力关系中理解。",
+    "conflict": "他批评两个方向：一边是 Parsons 式宏大理论过于抽象，一边是调查研究沉迷变量和方法。他担心社会学变成高级技术服务，而不是公共批判。",
+    "legacy": "社会学想象力之所以至今有效，是因为它提供了一种抵抗学科专业化的语言。哥大因此不只生产主流范式，也生产了反思主流范式的经典。",
+    "keywords": [
+      "社会学想象力",
+      "权力精英",
+      "内部批判"
+    ],
+    "timeline": [
+      [
+        "1945",
+        "进入 Lazarsfeld 周围的研究生态，理论与方法结合"
+      ],
+      [
+        "1956",
+        "出版 The Power Elite"
+      ],
+      [
+        "1959",
+        "出版 The Sociological Imagination"
+      ],
+      [
+        "1962",
+        "去世"
+      ]
+    ]
+  },
+  {
+    "id": "coleman",
+    "group": "person",
+    "size": "small",
+    "era": "golden",
+    "year": "1955",
+    "x": 1140,
+    "y": 280,
+    "icon": "📐",
+    "label": "科尔曼",
+    "sub": "James Coleman",
+    "summary": "Coleman 是 BASR 学徒制最典型的外溢成果。他在哥大接受强方法训练，后来把量化、教育研究和数理建模带到更广阔的美国社会学版图。",
+    "changed": "他说明哥大的影响不是只留在纽约。一个博士生离开后，可以把方法、问题意识和研究组织经验带到芝加哥、Johns Hopkins 等其他中心。",
+    "conflict": "外溢也是失血。哥大培养出全国性人才，但这些人才的流动也削弱了哥大对量化社会学中心地位的垄断。",
+    "legacy": "Coleman Report 让社会学直接进入美国教育政策争论。它显示 BASR 传统不仅能生产论文，也能影响国家层面的公共政策。",
+    "keywords": [
+      "教育社会学",
+      "数理社会学",
+      "人才外流"
+    ],
+    "timeline": [
+      [
+        "1955",
+        "获哥大博士"
+      ],
+      [
+        "1956",
+        "离开哥大前往芝加哥"
+      ],
+      [
+        "1966",
+        "Coleman Report 引发教育政策讨论"
+      ]
+    ]
+  },
+  {
+    "id": "blau",
+    "group": "person",
+    "size": "small",
+    "era": "golden",
+    "year": "1952",
+    "x": 1300,
+    "y": 840,
+    "icon": "🏢",
+    "label": "布劳",
+    "sub": "Peter Blau",
+    "summary": "Blau 展示了 Merton 谱系的另一种成果。他把组织、交换、权力和社会结构联系起来，使哥大训练进入组织社会学和地位结构研究。",
+    "changed": "他说明黄金时代不是只培养技术型量化研究者，也培养能把理论概念转化为结构分析的学者。",
+    "conflict": "Blau 的成功也说明哥大的影响开始分散。黄金时代越强，越容易把自己的方法和学生送到其他大学，让别的中心变强。",
+    "legacy": "他提醒用户，哥大黄金时代的核心不是单一学派，而是一套能把理论、组织和经验研究结合起来的训练体制。",
+    "keywords": [
+      "组织社会学",
+      "社会交换",
+      "结构分析"
+    ],
+    "timeline": [
+      [
+        "1952",
+        "获哥大博士"
+      ],
+      [
+        "1960s",
+        "组织与交换理论研究成熟"
+      ],
+      [
+        "1974",
+        "任 ASA 主席"
+      ]
+    ]
+  },
+  {
+    "id": "lipset",
+    "group": "person",
+    "size": "small",
+    "era": "golden",
+    "year": "1949",
+    "x": 1280,
+    "y": 380,
+    "icon": "🗳️",
+    "label": "李普赛特",
+    "sub": "Seymour Martin Lipset",
+    "summary": "Lipset 让哥大谱系进入政治社会学和比较民主研究。他关心的不是单个制度如何运转，而是哪些社会条件让民主、政党、阶级妥协和政治稳定成为可能。",
+    "changed": "他把社会学问题推进到政治制度背后：经济发展、阶级结构、教育、宗教和组织生活如何塑造民主的社会基础。",
+    "conflict": "这类研究容易被后来的批评者质疑为现代化理论色彩过强，但它确实把社会学推入了比较政治和国际讨论。",
+    "legacy": "他的存在说明哥大黄金时代不只是美国城市、媒体或调查方法，也影响了政治学、比较研究和现代化理论。",
+    "keywords": [
+      "政治社会学",
+      "民主条件",
+      "比较研究"
+    ],
+    "timeline": [
+      [
+        "1949",
+        "获哥大博士"
+      ],
+      [
+        "1960",
+        "出版 Political Man"
+      ],
+      [
+        "1982",
+        "任 ASA 主席"
+      ]
+    ]
+  },
+  {
+    "id": "bell",
+    "group": "person",
+    "size": "small",
+    "era": "golden",
+    "year": "1969",
+    "x": 1300,
+    "y": 170,
+    "icon": "📰",
+    "label": "贝尔",
+    "sub": "Daniel Bell",
+    "summary": "Bell 让用户看到哥大黄金时代还有公共知识分子的面向。他不属于 BASR 的核心调查机器，却把社会理论、知识阶层、意识形态和后工业社会带入更广的公共讨论。",
+    "changed": "他改变的是哥大影响力的出口。哥大的知识不只通过方法和接受严密研究训练，后来发展为城市和不平等研究扩散，也通过大书、杂志、公共论辩和政策语言进入社会。",
+    "conflict": "Bell 的离开是中衰期的信号之一。哥大不仅失去技术型和量化型人才，也流失公共理论型人物。",
+    "legacy": "他提醒用户，一所社会学强系的影响不只看论文数量，还要看它是否能生产解释时代变化的大概念。",
+    "keywords": [
+      "后工业社会",
+      "公共知识分子",
+      "社会理论"
+    ],
+    "timeline": [
+      [
+        "1960",
+        "出版 The End of Ideology"
+      ],
+      [
+        "1969",
+        "离开哥大前往哈佛"
+      ],
+      [
+        "1973",
+        "出版 The Coming of Post-Industrial Society"
+      ]
+    ]
+  },
+  {
+    "id": "decline",
+    "group": "event",
+    "size": "mid",
+    "era": "decline",
+    "year": "1970–88",
+    "x": 1480,
+    "y": 540,
+    "icon": "📉",
+    "label": "中途衰落",
+    "sub": "Why the decline?",
+    "summary": "中途衰落指的是，哥大原本赖以成为中心的条件同时松动：纽约城市财政恶化，校园政治震荡（学生运动），明星教授离去（拉扎斯菲尔德去世，投资机构撤资），BASR 因此关闭，量化社会学的重心向中西部大学（威斯康辛）转移。",
+    "changed": "它改变了我们对学术中心的理解。学术研究中心依赖资金、城市环境、研究机构、人才流动和学科风向。一旦这些条件断裂，声望也会迅速失去组织基础。",
+    "conflict": "哥大并不是没有优秀学者，而是缺少能像 BASR 那样持续组织项目、训练学生和吸引资源的核心装置。同时，美国社会学的量化和地位获得研究开始在 Wisconsin、Michigan、Chicago 等地形成新的中心。",
+    "legacy": "这段衰落非常重要，因为它解释了 1988 年后的重建为什么不是简单复古。哥大必须重新发明自己，从旧的调查机器转向关系社会学、历史机制和跨学科平台。",
+    "keywords": [
+      "BASR 关闭",
+      "财政危机",
+      "量化西移",
+      "中心瓦解"
+    ],
+    "timeline": [
+      [
+        "1968",
+        "哥大校园抗议与纽约城市危机改变大学环境"
+      ],
+      [
+        "1969",
+        "Bell 离开，威斯康星模型等新中心上升"
+      ],
+      [
+        "1976",
+        "Lazarsfeld 去世，旧机器失去核心人物"
+      ],
+      [
+        "1977",
+        "BASR 正式关闭"
+      ],
+      [
+        "1980s",
+        "哥大社会学进入低潮，等待新的组织语言"
+      ]
+    ]
+  },
+  {
+    "id": "wisconsin",
+    "group": "concept",
+    "size": "small",
+    "era": "decline",
+    "year": "1969+",
+    "x": 1480,
+    "y": 280,
+    "icon": "🧭",
+    "label": "威斯康辛模型",
+    "sub": "Quantitative shift west",
+    "summary": "威斯康辛模型象征美国量化社会学重心从纽约向中西部转移。它围绕教育、职业流动、家庭背景和地位获得，建立了高度成熟的量化研究范式。",
+    "changed": "它改变的是学科地理。量化社会学并没有因为 BASR 衰落而消失，而是在 Wisconsin、Michigan、Chicago 等地形成新的制度基地。",
+    "conflict": "对哥大来说，这意味着它失去的不只是一个研究中心，而是全国范围内定义主流方法的权力。",
+    "legacy": "这个节点帮助用户理解：学术谱系不是抽象思想的漂浮，而是会随人才、资金、数据和训练体系在地图上迁移。",
+    "keywords": [
+      "地位获得",
+      "量化西移",
+      "学术地理"
+    ],
+    "timeline": [
+      [
+        "1960s–1970s",
+        "地位获得研究和教育流动研究成为美国量化社会学核心"
+      ],
+      [
+        "1970s",
+        "中西部大学成为新的方法训练中心"
+      ]
+    ]
+  },
+  {
+    "id": "white",
+    "group": "person",
+    "size": "big",
+    "era": "rebirth",
+    "year": "1988",
+    "x": 1740,
+    "y": 340,
+    "icon": "🕸️",
+    "label": "怀特",
+    "sub": "Harrison White",
+    "summary": "White 的到来不是让哥大回到 Lazarsfeld 时代，而是给了哥大一套新的语言：社会不是孤立个体和变量的集合，而是由关系、网络、位置、身份和机会结构组成。",
+    "changed": "他改变了哥大的认识论。旧的调查机器擅长把社会分解为变量，White 则要求从关系中理解行动者，从网络位置中理解市场、组织和身份。",
+    "conflict": "这不是对 BASR 的简单继承。它保留了严密建模和经验研究的雄心，但把解释重心从变量因果转向关系结构。",
+    "legacy": "White 之后，哥大重新获得一种可识别的当代风格：网络分析、关系社会学、经济社会学和组织研究开始成为新的声誉来源。",
+    "keywords": [
+      "网络分析",
+      "关系社会学",
+      "身份与控制"
+    ],
+    "timeline": [
+      [
+        "1988",
+        "来到哥大，重建开始"
+      ],
+      [
+        "1992",
+        "出版 Identity and Control"
+      ],
+      [
+        "2000s",
+        "纽约关系派影响扩大"
+      ],
+      [
+        "2024",
+        "去世"
+      ]
+    ]
+  },
+  {
+    "id": "tilly",
+    "group": "person",
+    "size": "mid",
+    "era": "rebirth",
+    "year": "1996",
+    "x": 1740,
+    "y": 780,
+    "icon": "📜",
+    "label": "蒂利",
+    "sub": "Charles Tilly",
+    "summary": "Tilly 让重生后的哥大不只是网络分析中心，也成为历史社会学和争议政治的重要场域。他研究国家形成、革命、社会运动、战争和集体行动。",
+    "changed": "他把关系语言放进时间中。社会关系不是静态网络，而是在冲突、组织、国家能力和历史过程中不断形成和重组。",
+    "conflict": "Tilly 的方法要求宏大历史问题和具体机制解释同时存在。这对学生很有启发，也很困难，因为它拒绝简单故事和单一变量解释。",
+    "legacy": "White 与 Tilly 共同构成哥大重生的双核心：一个重建关系和网络语言，一个把关系放进历史过程和政治冲突。",
+    "keywords": [
+      "历史社会学",
+      "争议政治",
+      "机制解释"
+    ],
+    "timeline": [
+      [
+        "1996",
+        "与 White 一起塑造重生后的纽约关系派和历史社会学气质"
+      ],
+      [
+        "1990s–2000s",
+        "争议政治与历史机制研究影响扩大"
+      ],
+      [
+        "2008",
+        "去世"
+      ]
+    ]
+  },
+  {
+    "id": "iserp",
+    "group": "institution",
+    "size": "mid",
+    "era": "rebirth",
+    "year": "1999",
+    "x": 1740,
+    "y": 560,
+    "icon": "🏛️",
+    "label": "ISERP",
+    "sub": "Institute for Social and Economic Research and Policy",
+    "summary": "ISERP 是 BASR 之后哥大重新积累研究组织力的重要平台。它不像 BASR 那样由单一调查机器统治，而是把社会科学、政策研究、数据资源和跨学科合作连接起来。",
+    "changed": "它改变的是重建期的组织方式。哥大不再依靠一个中心垄断方法，而是通过研究所、工作坊、跨系网络和项目平台来维持学术生态。",
+    "conflict": "ISERP 的优势是开放和跨学科，局限也在这里。它不再制造一个像 BASR 那样高度集中的黄金时代神话，而是更像支撑多元集群的基础设施。",
+    "legacy": "对 MA 学生来说，ISERP 提醒他们：哥大的训练不只在课堂，也在讲座、工作坊、研究中心和跨系资源中。",
+    "keywords": [
+      "跨学科平台",
+      "政策研究",
+      "研究生态"
+    ],
+    "timeline": [
+      [
+        "1999",
+        "ISERP 成立"
+      ],
+      [
+        "2000s",
+        "成为跨学科社会科学资源平台"
+      ],
+      [
+        "2010s",
+        "与当代研究集群共同支撑项目生态"
+      ]
+    ]
+  },
+  {
+    "id": "bearman",
+    "group": "person",
+    "size": "small",
+    "era": "contemporary",
+    "year": "2000s",
+    "x": 2080,
+    "y": 200,
+    "icon": "🧬",
+    "label": "贝尔曼",
+    "sub": "Peter Bearman",
+    "summary": "Bearman 代表 White 之后更成熟的关系派。他把网络、历史、文化和生命历程问题连接起来，显示关系社会学可以进入非常具体的经验材料。",
+    "changed": "他改变的是当代哥大关系派的广度。网络不只是方法工具，也可以用来解释身份形成、社会互动、文化模式和历史过程。",
+    "conflict": "如果只把网络分析理解成画关系图，就会错过 Bearman 的意义。他真正重要的地方在于把形式化关系和厚实社会问题结合起来。",
+    "legacy": "他说明当代哥大不是靠单一巨星，而是由多个中坚学者维持研究集群。对学生来说，这意味着可以在同一系中接触多种方法和问题。",
+    "keywords": [
+      "网络",
+      "文化过程",
+      "生命历程"
+    ],
+    "timeline": [
+      [
+        "2000s",
+        "成为哥大当代关系派的重要支柱"
+      ],
+      [
+        "2010s",
+        "推动网络、历史与文化研究的结合"
+      ]
+    ]
+  },
+  {
+    "id": "wimmer",
+    "group": "person",
+    "size": "small",
+    "era": "contemporary",
+    "year": "2010s",
+    "x": 2230,
+    "y": 300,
+    "icon": "🌍",
+    "label": "维默",
+    "sub": "Andreas Wimmer",
+    "summary": "Wimmer 让哥大当代社会学具有更强的全球比较视野。他研究民族边界、国家形成、排斥与包容，关心群体身份如何在制度和历史过程中被制造出来。",
+    "changed": "他把哥大的问题从美国社会结构扩展到全球和比较历史尺度。族群不是天然事实，而是由国家、战争、制度分类和政治联盟共同塑造。",
+    "conflict": "这条线要求学生同时理解历史、比较方法和社会分类机制。它不是泛泛地谈全球化，而是追问边界如何形成。",
+    "legacy": "Wimmer 使当代哥大更适合研究民族、边界、移民、国家和全球不平等的学生，也补充了关系派之外的比较历史维度。",
+    "keywords": [
+      "族群边界",
+      "国家形成",
+      "比较历史"
+    ],
+    "timeline": [
+      [
+        "2010s",
+        "成为当代哥大的重要比较历史社会学力量"
+      ],
+      [
+        "2020s",
+        "相关研究继续塑造系所全球取向"
+      ]
+    ]
+  },
+  {
+    "id": "eyal",
+    "group": "person",
+    "size": "small",
+    "era": "contemporary",
+    "year": "2010s",
+    "x": 2230,
+    "y": 540,
+    "icon": "🧪",
+    "label": "艾亚尔",
+    "sub": "Gil Eyal",
+    "summary": "Eyal 代表哥大当代知识社会学和专家研究。他关心专家、诊断、分类、知识制度和国家之间如何共同定义社会现实。",
+    "changed": "他改变的是用户对哥大的刻板印象。哥大不只是网络、量化和城市不平等，也研究知识本身如何获得权威，专业判断如何进入治理。",
+    "conflict": "知识社会学常常比对象研究更难理解，因为它不是问“社会问题是什么”，而是问“谁有资格定义这个问题，凭什么定义”。",
+    "legacy": "这条线对申请者很重要。它说明哥大适合那些想研究专家系统、科学技术、医学分类、政策知识和制度权威的人。",
+    "keywords": [
+      "知识社会学",
+      "专家系统",
+      "分类"
+    ],
+    "timeline": [
+      [
+        "2010s",
+        "成为当代哥大的重要理论线索"
+      ],
+      [
+        "2020s",
+        "专家、知识与分类研究持续影响学生选题"
+      ]
+    ]
+  },
+  {
+    "id": "stark",
+    "group": "person",
+    "size": "small",
+    "era": "contemporary",
+    "year": "2010s",
+    "x": 2080,
+    "y": 780,
+    "icon": "💹",
+    "label": "斯塔克",
+    "sub": "David Stark",
+    "summary": "Stark 代表哥大当代经济社会学、组织研究和估值研究。他关心市场如何不是自然形成，而是在组织、网络、技术和判断标准中被制造。",
+    "changed": "他把 White 的关系语言推进到市场和组织领域。价值不是市场自动发现的结果，而是由评价装置、组织实践和不确定性中的判断共同产生。",
+    "conflict": "这类研究会打破经济学式的简单市场想象，但也要求学生能处理组织、技术、网络和文化评价之间的复杂关系。",
+    "legacy": "Stark 让哥大当代谱系不只关心不平等和政治，也能解释资本主义、市场、创新和组织如何运作。",
+    "keywords": [
+      "经济社会学",
+      "组织",
+      "估值"
+    ],
+    "timeline": [
+      [
+        "2010s",
+        "成为哥大经济社会学和组织研究的重要支柱"
+      ],
+      [
+        "2020s",
+        "估值与不确定性研究继续扩展"
+      ]
+    ]
+  },
+  {
+    "id": "khan",
+    "group": "person",
+    "size": "small",
+    "era": "contemporary",
+    "year": "2010s / 21",
+    "x": 2080,
+    "y": 80,
+    "icon": "🎩",
+    "label": "卡恩",
+    "sub": "Shamus Khan",
+    "summary": "Khan 让哥大的精英研究和不平等研究具有很高公共可见度。他研究精英学校、文化资本、阶层再生产和美国不平等。",
+    "changed": "他改变的是哥大当代社会学与公共议题的连接方式。精英不只是有钱人，而是一套教育制度、身体习惯、文化判断和社会网络共同生产的位置。",
+    "conflict": "他的 2021 年显示当代学术中心之间的人才仍持续流动也提醒用户：当代谱系仍然处在流动中。强系之间的人才迁徙本身就是学术地理的一部分。",
+    "legacy": "Khan 说明哥大仍然能把学术研究转化为公众能理解的不平等语言。这对面向大学生的科普尤其重要。",
+    "keywords": [
+      "精英研究",
+      "不平等",
+      "文化资本"
+    ],
+    "timeline": [
+      [
+        "2010s",
+        "在哥大任教并形成公共影响"
+      ],
+      [
+        "2021",
+        "显示当代学术中心之间的人才仍持续流动"
+      ]
+    ]
+  },
+  {
+    "id": "small",
+    "group": "person",
+    "size": "mid",
+    "era": "contemporary",
+    "year": "2023",
+    "x": 2230,
+    "y": 430,
+    "icon": "🏙️",
+    "label": "斯莫尔",
+    "sub": "Mario L. Small",
+    "summary": "Small 的回归和系主任身份，是当代哥大稳固化的重要信号。他把城市社会学、不平等、网络、机构和混合方法连接起来。",
+    "changed": "他改变的是用户理解哥大的时间感。哥大不只是过去有 Lazarsfeld 和 Merton，它今天仍在美国社会学的核心议题上组织研究。",
+    "conflict": "如果只讲历史名人，网页会变成怀旧展览。Small 的位置说明这张图的终点不是过去，而是今天的系所如何继续生产问题和训练学生。",
+    "legacy": "对申请者来说，Small 很关键。他代表当代哥大如何把城市、贫困、不平等、社会网络和研究设计结合成可训练的项目气质。",
+    "keywords": [
+      "城市社会学",
+      "不平等",
+      "混合方法"
+    ],
+    "timeline": [
+      [
+        "2023",
+        "回归哥大并担任系主任"
+      ],
+      [
+        "2020s",
+        "当代哥大研究议程进一步稳定"
+      ]
+    ]
+  },
+  {
+    "id": "milstein",
+    "group": "person",
+    "size": "small",
+    "era": "contemporary",
+    "year": "2011",
+    "x": 2080,
+    "y": 980,
+    "icon": "🗂️",
+    "label": "米尔斯坦",
+    "sub": "Denise Milstein",
+    "summary": "Milstein 不是那种最容易被写进学科史的明星人物，但她对 MA 项目非常关键。她代表项目协调、课程组织、学生支持和日常制度化劳动。",
+    "changed": "她改变的是 MA 的运行形态。一个项目不是官网上几门课的组合，而是需要有人把招生、课程、论文、活动、学生社群和教师资源连接起来。",
+    "conflict": "传统学科史常常忽略这种组织劳动，只写大理论家和大项目。但如果目标是理解 MA 项目，这类人物反而决定学生真实体验。",
+    "legacy": "Milstein 节点让网页从学科史进入项目史。它告诉用户，哥大 MA 的形成不仅来自百年声望，也来自具体制度设计和持续运行。",
+    "keywords": [
+      "MA 建制化",
+      "项目协调",
+      "学生支持"
+    ],
+    "timeline": [
+      [
+        "2011",
+        "成为 MA 项目协调和制度化的重要人物"
+      ],
+      [
+        "2010s",
+        "Free-Standing MA 的课程与学生支持更加稳定"
+      ]
+    ]
+  },
+  {
+    "id": "maProgram",
+    "group": "institution",
+    "size": "mid",
+    "era": "contemporary",
+    "year": "2011+",
+    "x": 2230,
+    "y": 760,
+    "icon": "🎓",
+    "label": "Sociology MA",
+    "sub": "Free-Standing MA",
+    "summary": "哥大 Sociology MA 不能只理解为“藤校硕士”。它更像一个研究训练入口，把哥大百年传统转译成一年制或短周期学生能够进入的课程、论文和学术社群。",
+    "changed": "它改变的是这张图的用途。学科史不再只是历史知识，而能帮助学生判断：这个项目到底重视理论、方法、问题意识、研究写作还是职业包装。",
+    "conflict": "项目具体设立年份存在档案缺口，这反而值得保留。它说明项目不是某一天突然诞生，而是在系所训练需求、研究生教育市场和内部组织劳动中逐步成形。",
+    "legacy": "MA 模式的核心结论是：哥大 MA 的吸引力不只在 Columbia 名字，而在它如何把 BASR 的证据意识、Merton 的理论训练、White 和 Tilly 的关系与历史取向转成学生训练。",
+    "keywords": [
+      "研究训练入口",
+      "项目 DNA",
+      "历史转译"
+    ],
+    "timeline": [
+      [
+        "2000s",
+        "Free-Standing MA 已经作为独立招生项目存在"
+      ],
+      [
+        "2011",
+        "项目制度化程度明显增强"
+      ],
+      [
+        "2020s",
+        "与当代研究集群和论文训练更紧密连接"
+      ]
+    ]
+  },
+  {
+    "id": "proseminar",
+    "group": "concept",
+    "size": "small",
+    "era": "contemporary",
+    "year": "当代",
+    "x": 2230,
+    "y": 980,
+    "icon": "🧭",
+    "label": "Pro-seminar",
+    "sub": "核心训练入口",
+    "summary": "Pro-seminar 是学生进入哥大社会学共同体的入口。它不只是普通课程，而是教学生如何读文献、识别问题、理解系所语言，并把模糊兴趣变成研究计划。",
+    "changed": "它把早期学徒制转化为课程化训练。过去学生通过研究中心和导师项目进入学术共同体，现在 MA 学生需要通过更明确的课程结构学习研究规范。",
+    "conflict": "Pro-seminar 的价值不在于提供一套标准答案，而在于让学生意识到，社会学问题必须被放进文献、方法和可完成的研究设计中。",
+        "keywords": [
+      "研究入口",
+      "文献训练",
+      "问题意识"
+    ],
+    "timeline": [
+      [
+        "当代",
+        "作为 MA 训练的重要入口"
+      ],
+      [
+        "项目运行中",
+        "帮助学生从兴趣过渡到研究设计"
+      ]
+    ]
+  },
+  {
+    "id": "thesis",
+    "group": "concept",
+    "size": "small",
+    "era": "contemporary",
+    "year": "当代",
+    "x": 1900,
+    "y": 1080,
+    "icon": "✍️",
+    "label": "Thesis",
+    "sub": "研究写作训练",
+    "summary": "Thesis 是 MA 项目最能体现研究导向的部分。它要求学生把一个社会学问题转化为可论证的论文，而不是停留在主题兴趣或案例堆砌。",
+    "changed": "它把博士式训练的一部分前移到硕士阶段。学生必须学会提出问题、进入文献、选择材料、说明方法，并写出有结构的分析。",
+    "conflict": "这对学生要求很高。没有清楚问题意识的人，很容易把 thesis 写成资料综述或观点散文，而不是社会学研究。",
+    "legacy": "Thesis 把 Merton 的理论与证据关系、BASR 的研究设计意识、当代方法多元性连接起来，是申请转化中最有用的解释点之一。",
+    "keywords": [
+      "论文训练",
+      "研究设计",
+      "MA-to-PhD"
+    ],
+    "timeline": [
+      [
+        "当代",
+        "作为 MA 研究训练核心环节"
+      ],
+      [
+        "学生路径",
+        "为 PhD 申请、研究岗位或政策分析写作提供样本"
+      ]
+    ]
+  },
+  {
+    "id": "dispatches",
+    "group": "concept",
+    "size": "small",
+    "era": "contemporary",
+    "year": "当代",
+    "x": 2080,
+    "y": 1130,
+    "icon": "📨",
+    "label": "Dispatches",
+    "sub": "从田野回到研究",
+    "summary": "Dispatches 类模块让学生把课堂、田野、实习、职业经验和研究问题重新连接。它提醒学生，社会学训练不是把现实排除在外，而是学习如何把现实转化为可分析材料。",
+    "changed": "它改变的是项目的社群感。MA 不只是修完学分，而是在一套写作、展示、反馈和共同讨论中逐步进入学术共同体。",
+    "conflict": "如果只看官网课程列表，这类模块很容易被忽略。但对学生体验而言，它可能比某些课程名称更能体现项目气质。",
+    "legacy": "这个节点让申请叙事更自然：学生不是被动接受课程，而是带着自己的经验进入一个能帮助其重新组织问题的研究社群。",
+    "keywords": [
+      "研究社群",
+      "经验转译",
+      "项目气质"
+    ],
+    "timeline": [
+      [
+        "当代",
+        "作为项目共同体与研究展示的一部分"
+      ],
+      [
+        "学生训练中",
+        "帮助经验材料转化为可讨论的社会学问题"
+      ]
+    ]
+  }
+];
+
+const edges = [
+  {from:'chair1894',to:'giddings',type:'institution'},
+  {from:'giddings',to:'dept',type:'institution'},
+  {from:'dept',to:'maciver',type:'mentor'},
+  {from:'dept',to:'lynd',type:'mentor'},
+  {from:'maciver',to:'lazarsfeld',type:'institution',dash:true},
+  {from:'lynd',to:'lazarsfeld',type:'institution'},
+  {from:'lynd',to:'merton',type:'institution'},
+  {from:'adorno',to:'lazarsfeld',type:'debate',dash:true},
+  {from:'lazarsfeld',to:'merton',type:'mentor'},
+  {from:'lazarsfeld',to:'basr',type:'institution'},
+  {from:'merton',to:'basr',type:'institution'},
+  {from:'merton',to:'mills',type:'debate',dash:true},
+  {from:'lazarsfeld',to:'mills',type:'debate',dash:true},
+  {from:'lazarsfeld',to:'coleman',type:'legacy'},
+  {from:'merton',to:'blau',type:'legacy'},
+  {from:'merton',to:'lipset',type:'legacy'},
+  {from:'lazarsfeld',to:'bell',type:'legacy',dash:true},
+  {from:'basr',to:'coleman',type:'mentor'},
+  {from:'basr',to:'decline',type:'institution'},
+  {from:'lazarsfeld',to:'decline',type:'institution'},
+  {from:'decline',to:'wisconsin',type:'legacy'},
+  {from:'decline',to:'white',type:'institution'},
+  {from:'white',to:'tilly',type:'mentor'},
+  {from:'white',to:'iserp',type:'institution'},
+  {from:'tilly',to:'iserp',type:'institution'},
+  {from:'white',to:'bearman',type:'legacy'},
+  {from:'white',to:'stark',type:'legacy'},
+  {from:'tilly',to:'wimmer',type:'legacy'},
+  {from:'iserp',to:'small',type:'institution'},
+  {from:'iserp',to:'eyal',type:'institution'},
+  {from:'iserp',to:'wimmer',type:'institution'},
+  {from:'iserp',to:'khan',type:'institution'},
+  {from:'small',to:'maProgram',type:'ma'},
+  {from:'milstein',to:'maProgram',type:'ma'},
+  {from:'maProgram',to:'proseminar',type:'ma'},
+  {from:'maProgram',to:'thesis',type:'ma'},
+  {from:'maProgram',to:'dispatches',type:'ma'},
+  {from:'merton',to:'thesis',type:'ma',dash:true},
+  {from:'basr',to:'proseminar',type:'ma',dash:true},
+  {from:'white',to:'maProgram',type:'ma',dash:true}
+];
+
+/* ----- 迁徙地图：使用真实经纬度 → viewBox(1600x920) ----- */
+/* 投影范围：经度 [-130, 30]，纬度 [25, 65]   线性映射 */
+const MAP_W = 1600, MAP_H = 920;
+const LON_MIN=-130, LON_MAX=30, LAT_MIN=25, LAT_MAX=65;
+function proj(lon,lat){
+  const x = (lon - LON_MIN) / (LON_MAX - LON_MIN) * MAP_W;
+  const y = MAP_H - (lat - LAT_MIN) / (LAT_MAX - LAT_MIN) * MAP_H;
+  return [x,y];
+}
+const CITIES = {
+  Stornoway:[-6.39,58.21,'Stornoway'],
+  Oxford:[-1.25,51.75,'Oxford'],
+  London:[-0.13,51.51,'London'],
+  Frankfurt:[8.68,50.11,'Frankfurt'],
+  Vienna:[16.37,48.21,'Vienna'],
+  Toronto:[-79.38,43.65,'Toronto'],
+  Boston:[-71.06,42.36,'Cambridge / Boston'],
+  NewYork:[-73.96,40.78,'Columbia · NYC'],
+  Princeton:[-74.66,40.35,'Princeton'],
+  Newark:[-74.17,40.74,'Newark'],
+  Chicago:[-87.62,41.88,'Chicago'],
+  AnnArbor:[-83.74,42.28,'Ann Arbor'],
+  Tucson:[-110.93,32.22,'Tucson · Arizona'],
+  NewOrleans:[-90.07,29.95,'Tulane · New Orleans']
+};
+function P(key,year,note){ const c=CITIES[key]; const [x,y]=proj(c[0],c[1]); return {key,name:c[2],x,y,year,note}; }
+
+const routes = {
+  maciver:{color:'#a894d3',mini:'Stornoway → Oxford → Toronto → Columbia',points:[
+    P('Stornoway','1882','从边缘语言共同体出发，后来把共同体和社会秩序问题带入理论社会学'),
+    P('Oxford','1900s','接受英国知识传统训练，形成理论与政治哲学背景'),
+    P('Toronto','1915–27','在北美大学制度中成名，为进入哥大积累声望'),
+    P('NewYork','1929','进入哥大，补强 Giddings 之后的理论维度')
+  ]},
+  lazarsfeld:{color:'#6da8db',mini:'Vienna → Newark → Princeton → Columbia',points:[
+    P('Vienna','1901','在维也纳的数学、心理学和社会研究环境中形成早期方法兴趣'),
+    P('Newark','1933–37','从欧洲流亡知识分子转入美国基金会和大学网络'),
+    P('Princeton','1937–39','通过广播研究项目连接媒体、基金会和社会调查'),
+    P('NewYork','1939 / 41','把项目、资助和人员带进哥大，黄金时代机器开始成形')
+  ]},
+  merton:{color:'#dc8b76',mini:'Philadelphia → Harvard → Tulane → Columbia',points:[
+    {key:'Phila',name:'Philadelphia',x:proj(-75.16,39.95)[0],y:proj(-75.16,39.95)[1],year:'1910',note:'出生'},
+    P('Boston','1930s','接受历史社会学与政治过程研究训练'),
+    P('NewOrleans','1938–41','积累教学和系所组织经验'),
+    P('NewYork','1941','进入 Lazarsfeld 周围的研究生态，理论与方法结合')
+  ]},
+  adorno:{color:'#a894d3',mini:'Frankfurt → Oxford → New York',points:[
+    P('Frankfurt','1903','带着批判理论的问题意识进入美国研究环境'),
+    P('Oxford','1934','欧洲流亡经历塑造其对资本主义文化工业的批判视角'),
+    P('NewYork','1938–40','与 Lazarsfeld 的项目逻辑冲突，行政研究和批判研究分裂')
+  ]},
+  white:{color:'#7eb690',mini:'Cambridge → Tucson → Columbia',points:[
+    P('Boston','1950s–60s','形成数学、物理和网络分析交叉背景'),
+    P('Tucson','1980s','在哥大之外形成关系社会学语言'),
+    P('NewYork','1988','把网络和关系本体论带入哥大，开启重建')
+  ]},
+  tilly:{color:'#7eb690',mini:'Harvard → Michigan → New School → Columbia',points:[
+    P('Boston','1950s','接受历史社会学与政治过程研究训练'),
+    P('AnnArbor','1960s–80s','在 Michigan 形成国家形成、革命和社会运动研究声望'),
+    P('NewYork','1984–96','进入纽约学术网络，为加入哥大创造条件'),
+    P('NewYork','1996','与 White 一起塑造重生后的纽约关系派和历史社会学气质')
+  ]},
+  small:{color:'#7ab5bc',mini:'Harvard → Chicago → Harvard → Columbia',points:[
+    P('Boston','1990s','接受严密研究训练，后来发展为城市和不平等研究'),
+    P('Chicago','2000s','在城市社会学传统浓厚的芝加哥积累研究经验'),
+    P('Boston','2010s','在顶尖研究型大学中进一步巩固学术声望'),
+    P('NewYork','2023','将城市、不平等、网络和混合方法带回哥大当代核心')
+  ]},
+  khan:{color:'#7ab5bc',mini:'Columbia → Princeton',points:[
+    P('NewYork','2010s','在精英与不平等研究中形成公共可见度'),
+    P('Princeton','2021','显示当代学术中心之间的人才仍持续流动')
+  ]}
+};
+
+/* =========================================================
+   状态 & 渲染
+   ========================================================= */
+const state = {
+  mode:'gene', era:'all', selected:'',
+  visibleLayers:new Set(layerMeta.map(d=>d.id)),
+  showContextRoutes:false, panelOpen:false,
+  gene:{zoom:.55,panX:30,panY:30},
+  map:{zoom:1,panX:0,panY:0},
+  // 拖拽节点后的位置覆写（id -> {x,y}）
+  customPos:{},
+  mapLabelOffsets:{}
+};
+const nodeById = Object.fromEntries(nodes.map(n=>[n.id,n]));
+// v4: compress the horizontal layout so the genealogy reads as a tighter field rather than a long sparse chain.
+const LAYOUT = {xScale:.70, yScale:.86, xOffset:76, yOffset:42};
+function baseNodePos(n){ return {x:n.x*LAYOUT.xScale + LAYOUT.xOffset, y:n.y*LAYOUT.yScale + LAYOUT.yOffset}; }
+const $ = s=>document.querySelector(s);
+const $$ = s=>[...document.querySelectorAll(s)];
+function nodePos(n){ return state.customPos[n.id] || baseNodePos(n); }
+
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'),1200); }
+function currentNode(){ return nodeById[state.selected] || nodes[0]; }
+function isMA(n){ return ['maProgram','milstein','proseminar','thesis','dispatches','small'].includes(n.id); }
+function isDebate(n){ return ['adorno','lazarsfeld','merton','mills','basr','maciver','lynd'].includes(n.id); }
+
+function renderEras(){
+  const el=$('#eraList'); el.innerHTML='';
+  eras.forEach(era=>{
+    const b=document.createElement('button');
+    b.className='eraBtn'+(state.era===era.id?' active':'');
+    b.innerHTML=`<span class="dot" style="background:${era.color}"></span><span><span class="eraName">${era.name}</span><span class="eraYears">${era.years}</span></span>`;
+    b.onclick=()=>{
+      state.era=era.id;
+      state.selected='';
+      renderAll();
+      requestAnimationFrame(()=>homeView('gene'));
+    };
+    el.appendChild(b);
+  });
+}
+function renderLayers(){
+  const el=$('#layerList'); el.innerHTML='';
+  layerMeta.forEach(L=>{
+    const b=document.createElement('button');
+    const on = state.visibleLayers.has(L.id);
+    b.className='layerBtn'+(on?' active':' inactive');
+    b.innerHTML=`<span class="layerLine" style="background:${L.color}"></span>${L.label}<span class="layerStatus">${on?'显示':'隐藏'}</span>`;
+    b.onclick=()=>{ state.visibleLayers.has(L.id)?state.visibleLayers.delete(L.id):state.visibleLayers.add(L.id); renderAll(); toast(L.label + (state.visibleLayers.has(L.id)?' 已显示':' 已隐藏')); };
+    el.appendChild(b);
+  });
+}
+function updateModeButtons(){
+  $$('.btn[data-mode]').forEach(b=>b.classList.toggle('active', b.dataset.mode===state.mode));
+  $('#main').classList.toggle('mapMode', state.mode==='map');
+  $('.canvas').classList.toggle('withPanel', state.panelOpen && state.mode!=='map');
+  $('#geneView').classList.toggle('active', state.mode!=='map');
+  $('#mapView').classList.toggle('active', state.mode==='map');
+}
+function defaultSelectedForMode(){ return {gene:'lazarsfeld', debate:'mills', ma:'maProgram', map:'lazarsfeld'}[state.mode]; }
+
+function visibleNodes(){
+  return nodes.filter(n=>{
+    const eraOk = state.era==='all' || n.era===state.era;
+    if(state.mode==='debate') return eraOk && isDebate(n);
+    if(state.mode==='ma')     return eraOk && (isMA(n) || ['basr','merton','white','iserp'].includes(n.id));
+    return eraOk;
+  });
+}
+function visibleEdges(vNodes){
+  const ids=new Set(vNodes.map(n=>n.id));
+  return edges.filter(e=>ids.has(e.from)&&ids.has(e.to)&&state.visibleLayers.has(e.type));
+}
+function neighborSet(){
+  const id=state.selected; const s=new Set([id]);
+  edges.forEach(e=>{ if(e.from===id)s.add(e.to); if(e.to===id)s.add(e.from); });
+  return s;
+}
+
+function renderLegend(){
+  const el=$('#legendStrip');
+  const items=[
+    {id:'all',label:'全部'},{id:'institution',label:'机构'},
+    {id:'person',label:'人物'},{id:'concept',label:'概念 / 项目'}
+  ];
+  el.innerHTML=items.map((it,i)=>`<button class="chip ${i===0?'active':''}" data-legend="${it.id}">${it.label}</button>`).join('');
+  $$('#legendStrip .chip').forEach(c=>c.onclick=()=>{
+    $$('#legendStrip .chip').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active');
+    const m=c.dataset.legend;
+    $$('#nodeLayer .node').forEach(n=>{
+      n.classList.remove('dim');
+      if(m==='all') return;
+      const g=n.dataset.group;
+      const ok = (m==='institution'&&g==='institution') || (m==='person'&&g==='person') || (m==='concept'&&(g==='concept'||g==='event'));
+      if(!ok) n.classList.add('dim');
+    });
+  });
+}
+
+/* 关键改进：让线穿过节点时，绕开节点。
+   做法：用强垂直 Bezier；同时根据是否被选中调整粗细 / 透明度。 */
+function edgePath(a,b){
+  const dx=b.x-a.x, dy=b.y-a.y;
+  const adx=Math.abs(dx), ady=Math.abs(dy);
+  // 主要按 x 方向延伸：曲率与水平距离成正比
+  const k = Math.min(.45, Math.max(.18, adx>0?180/adx:.3));
+  const c1x = a.x + dx*k, c1y = a.y;
+  const c2x = b.x - dx*k, c2y = b.y;
+  return `M ${a.x} ${a.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${b.x} ${b.y}`;
+}
+
+function renderEraBands(){
+  const svg=$('#geneSvg');
+  const bands=[
+    {id:'founding',name:'创世纪',x:60,w:340,color:'#C2FFD8'},
+    {id:'transition',name:'过渡',x:420,w:240,color:'#A8EDE0'},
+    {id:'golden',name:'黄金时代',x:680,w:540,color:'#8AD2EA'},
+    {id:'decline',name:'中衰',x:1240,w:200,color:'#6BAAF3'},
+    {id:'rebirth',name:'重生',x:1460,w:280,color:'#557EF8'},
+    {id:'contemporary',name:'当代',x:1760,w:600,color:'#465EFB'}
+  ];
+  bands.forEach(b=>{
+    const era = eras.find(e=>e.id===b.id) || {years:''};
+    const x=b.x*LAYOUT.xScale+LAYOUT.xOffset;
+    const w=b.w*LAYOUT.xScale;
+    const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    r.setAttribute('x',x); r.setAttribute('y',0); r.setAttribute('width',w); r.setAttribute('height',1300);
+    r.setAttribute('fill',b.color);
+    r.setAttribute('opacity','.34');
+    svg.appendChild(r);
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',x+18); t.setAttribute('y',30); t.setAttribute('class','regionLabel'); t.textContent=`${b.name}`; svg.appendChild(t);
+    const y=document.createElementNS('http://www.w3.org/2000/svg','text');
+    y.setAttribute('x',x+18); y.setAttribute('y',48); y.setAttribute('class','cityHint'); y.textContent=era.years || ''; svg.appendChild(y);
+  });
+}
+
+function renderGraph(){
+  const vNodes=visibleNodes();
+  if(state.selected && !vNodes.some(n=>n.id===state.selected)) state.selected='';
+  const vEdges=visibleEdges(vNodes);
+  const ns=neighborSet();
+  const hasSel = !!state.selected;
+
+  const svg=$('#geneSvg'); svg.innerHTML='';
+  renderEraBands();
+
+  // 边：默认极淡；与选中节点相连时高亮
+  vEdges.forEach(e=>{
+    const A=nodePos(nodeById[e.from]), B=nodePos(nodeById[e.to]);
+    const meta=layerMeta.find(m=>m.id===e.type); const color=meta?.color||'#97a1a7';
+    const isHi = hasSel && (e.from===state.selected||e.to===state.selected);
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d', edgePath(A,B));
+    p.setAttribute('fill','none');
+    p.setAttribute('stroke',color);
+    p.setAttribute('stroke-width', isHi ? (e.type==='ma'?3.6:3.0) : 1.4);
+    p.setAttribute('opacity', isHi ? .95 : .30);
+    p.setAttribute('stroke-linecap','round');
+    if(e.dash) p.setAttribute('stroke-dasharray','7 6');
+    svg.appendChild(p);
+  });
+
+  const layer=$('#nodeLayer'); layer.innerHTML='';
+  vNodes.forEach(n=>{
+    const pos=nodePos(n);
+    const el=document.createElement('button');
+    const dim = hasSel && !ns.has(n.id) ? ' dim' : '';
+    const sel = state.selected===n.id ? ' selected' : '';
+    el.className=`node ${n.group} ${n.size}${dim}${sel}`;
+    el.style.left=pos.x+'px'; el.style.top=pos.y+'px';
+    el.dataset.id=n.id; el.dataset.group=n.group;
+    el.innerHTML=`<div class="icon"><div class="emoji">${n.icon}</div><div class="yearBadge">${n.year}</div></div><div class="label">${n.label}<small>${n.sub}</small></div>`;
+    attachNodeDrag(el, n);
+    layer.appendChild(el);
+  });
+  renderLegend();
+}
+
+/* ---- 节点拖拽（在缩放/平移坐标系中） ---- */
+function attachNodeDrag(el, node){
+  let startX=0, startY=0, baseX=0, baseY=0, moved=false, dragging=false;
+  el.addEventListener('mousedown',e=>{
+    e.stopPropagation(); e.preventDefault();
+    dragging=true; moved=false;
+    // v4: show the content panel immediately on pointer down; users no longer need to drag to trigger a refresh.
+    state.selected=node.id; if(!state.panelOpen) state.panelOpen=true; renderPanel(); redrawEdgesOnly();
+    document.querySelectorAll('#nodeLayer .node').forEach(x=>x.classList.toggle('selected', x.dataset.id===node.id));
+    const z=state.gene.zoom;
+    startX=e.clientX; startY=e.clientY;
+    const p=nodePos(node); baseX=p.x; baseY=p.y;
+    el.classList.add('dragging');
+    function onMove(ev){
+      const dx=(ev.clientX-startX)/z, dy=(ev.clientY-startY)/z;
+      if(Math.hypot(dx,dy)>2) moved=true;
+      state.customPos[node.id] = {x:baseX+dx, y:baseY+dy};
+      el.style.left=(baseX+dx)+'px'; el.style.top=(baseY+dy)+'px';
+      // 重画连线（轻量：只更新 svg 边）
+      redrawEdgesOnly();
+    }
+    function onUp(){
+      dragging=false; el.classList.remove('dragging');
+      window.removeEventListener('mousemove',onMove);
+      window.removeEventListener('mouseup',onUp);
+      if(!moved){ state.selected=node.id; if(!state.panelOpen) state.panelOpen=true; renderAll(); }
+    }
+    window.addEventListener('mousemove',onMove);
+    window.addEventListener('mouseup',onUp);
+  });
+}
+function redrawEdgesOnly(){
+  const svg=$('#geneSvg');
+  const vNodes=visibleNodes();
+  const vEdges=visibleEdges(vNodes);
+  const ns=neighborSet();
+  // 移除旧边但保留时代背景：简单重画
+  svg.innerHTML=''; renderEraBands();
+  vEdges.forEach(e=>{
+    const A=nodePos(nodeById[e.from]), B=nodePos(nodeById[e.to]);
+    const meta=layerMeta.find(m=>m.id===e.type); const color=meta?.color||'#97a1a7';
+    const isHi = state.selected && (e.from===state.selected||e.to===state.selected);
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d', edgePath(A,B));
+    p.setAttribute('fill','none'); p.setAttribute('stroke',color);
+    p.setAttribute('stroke-width', isHi ? (e.type==='ma'?3.6:3.0) : 1.4);
+    p.setAttribute('opacity', isHi ? .95 : .30);
+    if(e.dash) p.setAttribute('stroke-dasharray','7 6');
+    svg.appendChild(p);
+  });
+}
+
+/* =========================================================
+   迁徙地图：真·北美 + 西欧 简化轮廓 + 经纬网格
+   ========================================================= */
+function renderMap(){
+  const svg=$('#mapSvg'); svg.innerHTML='';
+  const NS='http://www.w3.org/2000/svg';
+  const add=(tag,attrs,parent=svg,text)=>{
+    const el=document.createElementNS(NS,tag);
+    for(const k in attrs) el.setAttribute(k,attrs[k]);
+    if(text!=null) el.textContent=text;
+    parent.appendChild(el); return el;
+  };
+  // 海
+  const grad=add('defs',{});
+  grad.innerHTML=`<linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#f6f8fa"/><stop offset="1" stop-color="#eef3f7"/></linearGradient>
+  <linearGradient id="landG" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#f4f5f4"/><stop offset="1" stop-color="#e9ecef"/></linearGradient>`;
+  add('rect',{x:0,y:0,width:MAP_W,height:MAP_H,fill:'url(#seaG)'});
+
+  // 经纬网格
+  for(let lon=LON_MIN; lon<=LON_MAX; lon+=10){
+    const [x]=proj(lon,LAT_MIN);
+    add('line',{x1:x,y1:0,x2:x,y2:MAP_H,class:'graticule'});
+  }
+  for(let lat=LAT_MIN; lat<=LAT_MAX; lat+=10){
+    const [,y]=proj(LON_MIN,lat);
+    add('line',{x1:0,y1:y,x2:MAP_W,y2:y,class:'graticule'});
+  }
+
+  // 轮廓：用一组真实经纬度的简化点列（手工挑选 ~ 30-60 点）
+  const NORTH_AMERICA = [
+    [-125,49],[-123.5,48.5],[-124,46],[-124.5,42],[-122.5,38],[-120.5,34.5],[-117.5,32.7],[-115,32.6],
+    [-114,30],[-110,29],[-106,28.5],[-103,28],[-100,26.5],[-97.5,26],[-94.5,29.5],[-91,29.2],
+    [-88.5,30.3],[-85,29.8],[-82,28],[-80,25],[-80.3,27],[-81,30.3],[-79,32.5],[-76,35],
+    [-75.5,36.8],[-75,39],[-74,40.6],[-71,41.5],[-70,42.5],[-69,44],[-67.5,45],[-66,45.7],
+    [-65,46.5],[-63,46.7],[-60.5,46],[-59.5,47.5],[-60,48.5],[-58,49],[-55,49.5],[-53,49],
+    [-52.5,52],[-55,53.5],[-57,54.5],[-60.5,55.5],[-64,57],[-66,58],[-67,60],[-68,62],
+    [-72,63.5],[-78,64],[-83,64.5],[-90,65],[-95,64],[-100,62],[-105,61],[-110,60],
+    [-115,60],[-120,60],[-125,60],[-130,57],[-130.5,54.5],[-128,52],[-125,49]
+  ];
+  const GREENLAND = [
+    [-45,60],[-50,61],[-52,63],[-50,65],[-43,65],[-42,62],[-44,60],[-45,60]
+  ];
+  const ICELAND = [
+    [-24,63.4],[-22,63.3],[-19,63.4],[-15,64.2],[-14,65.5],[-18,66],[-22,65.7],[-24,64.5],[-24,63.4]
+  ];
+  const UK = [
+    [-5,50],[-4,50.3],[-2,50.7],[0,51],[1.5,51.3],[1.4,52.3],[0.8,52.9],[1.7,52.8],
+    [1.7,53.5],[0,53.6],[-0.5,54.5],[-1.5,55.4],[-1.7,56.2],[-2.5,57.5],[-3.2,58.5],
+    [-4.5,58.6],[-5,57.5],[-5.8,56.5],[-5.5,55.3],[-4.5,54.7],[-5.5,54.4],[-5,53.4],
+    [-4.5,53],[-4.7,52.5],[-4,51.8],[-5,51.5],[-5,50]
+  ];
+  const IRELAND = [
+    [-10,52],[-9.5,51.5],[-8,51.6],[-6.5,52.2],[-6.2,53.2],[-6,54],[-7,55.2],[-8.5,55],
+    [-10,54.5],[-10,53],[-10,52]
+  ];
+  const EUROPE = [
+    [-9.5,43],[-8.5,42],[-9,38.7],[-7.5,37],[-5.5,36],[-2,36.7],[0,38],[3,42],[4,43.5],
+    [7,43.7],[10,44],[12.5,45.5],[14,45],[16,43],[18.5,42.5],[20,42],[22,40],[23,38],
+    [27,37],[28,40],[30,41],[32,41.5],[36,41.5],[39,42.5],[42,43],[44,42.5],[45,41],
+    [48,41.5],[49.5,42.5],[48,44],[47,46],[40,47.5],[37,46.5],[35,46],[33,45.5],[31,46.5],
+    [28,45],[28,44],[27,42.5],[25,41],[23,42.5],[21,44],[18,45],[16,46],[14,48],[12,49],
+    [10,50],[7,50.5],[6,51],[4,51.5],[3.5,53],[6,53.5],[8,54],[8.5,55],[10,55.5],
+    [12,55],[12,54],[14,54],[18,55],[21,55.5],[23,55],[25,57],[28,59],[30,60],[31,62],
+    [29,64],[27,65],[25,65.5],[22,65],[20,64],[18,63],[15,62],[13,61],[10,59.5],[8,58.5],
+    [5,58],[4,57],[5,56],[7,55],[6,54],[4,53],[1,51.5],[-1,49.7],[-3,48.5],[-4.5,48.5],
+    [-4.5,47.5],[-2,46.5],[-1.5,45],[-1.7,43.5],[-3.5,43.5],[-9.5,43]
+  ];
+
+  function poly(pts,fill,stroke){
+    const d = pts.map((p,i)=>{ const [x,y]=proj(p[0],p[1]); return (i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1); }).join(' ')+' Z';
+    add('path',{d, fill: fill||'url(#landG)', stroke:'none','stroke-width':0,'stroke-linejoin':'round',class:'coast'});
+  }
+  poly(NORTH_AMERICA);
+  poly(GREENLAND);
+  poly(ICELAND);
+  poly(EUROPE);
+  poly(UK);
+  poly(IRELAND);
+
+  // 海洋 / 区域标签
+  const [ax,ay]=proj(-40,52); add('text',{x:ax,y:ay,class:'oceanLabel','text-anchor':'middle'},svg,'Atlantic');
+  const [nx,ny]=proj(-95,55); add('text',{x:nx,y:ny,class:'regionLabel','text-anchor':'middle'},svg,'North America');
+  const [ex,ey]=proj(15,55);  add('text',{x:ex,y:ey,class:'regionLabel','text-anchor':'middle'},svg,'Europe');
+
+  // ===== 路线 =====
+  const activeId = routes[state.selected] ? state.selected : 'lazarsfeld';
+  const entries = Object.entries(routes);
+
+  // 先画所有非 active 的（背景）
+  entries.forEach(([id,r])=>{
+    if(id===activeId) return;
+    if(!state.showContextRoutes) return;
+    drawRoute(svg, id, r, false);
+  });
+  // 再画 active
+  drawRoute(svg, activeId, routes[activeId], true);
+  renderRouteDock(activeId);
+}
+
+function ensureArrowMarker(svg, id, color, dim){
+  let defs = svg.querySelector('defs');
+  if(!defs){ defs=document.createElementNS('http://www.w3.org/2000/svg','defs'); svg.prepend(defs); }
+  const markerId = `arrow-${id}-${dim?'dim':'active'}`;
+  if(!svg.querySelector('#'+markerId)){
+    const m=document.createElementNS('http://www.w3.org/2000/svg','marker');
+    m.setAttribute('id',markerId); m.setAttribute('viewBox','0 0 10 10');
+    m.setAttribute('refX','8.5'); m.setAttribute('refY','5');
+    m.setAttribute('markerWidth', dim?'5':'7'); m.setAttribute('markerHeight', dim?'5':'7');
+    m.setAttribute('orient','auto-start-reverse');
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d','M 0 0 L 10 5 L 0 10 z');
+    p.setAttribute('fill',color); p.setAttribute('opacity',dim?'.35':'.95');
+    m.appendChild(p); defs.appendChild(m);
+  }
+  return markerId;
+}
+
+function routeSegmentPath(a,b,idx,id){
+  const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+  const dx=b.x-a.x, dy=b.y-a.y;
+  const len=Math.max(1,Math.hypot(dx,dy));
+  const nx=-dy/len, ny=dx/len;
+  const routeShift={
+    lazarsfeld:-.55, merton:.35, adorno:.82, maciver:-.90,
+    white:1.15, tilly:-1.18, small:.72, khan:-.72, milstein:.45
+  };
+  const direction = routeShift[id] ?? (idx%2? .7 : -.7);
+  const off = Math.min(150, len*0.22) * direction;
+  const cx=mx + nx*off, cy=my + ny*off;
+  return `M ${a.x.toFixed(1)} ${a.y.toFixed(1)} Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
+}
+
+function drawRoute(svg, id, r, isActive){
+  const NS='http://www.w3.org/2000/svg';
+  const pts=r.points;
+  const markerId=ensureArrowMarker(svg,id,r.color,!isActive);
+  // v4: draw each segment separately, each with an arrow head, so direction is explicit.
+  for(let i=1;i<pts.length;i++){
+    const path=document.createElementNS(NS,'path');
+    path.setAttribute('d', routeSegmentPath(pts[i-1],pts[i],i,id));
+    path.setAttribute('stroke', r.color);
+    path.setAttribute('marker-end', `url(#${markerId})`);
+    path.setAttribute('class','routePath'+(isActive?'':' dim'));
+    svg.appendChild(path);
+  }
+
+  // pin + draggable labels
+  const NYC_DIRS = {NewYork:[30,-34], Princeton:[38,38], Newark:[-112,-38], Boston:[32,-38], Toronto:[-112,-28], Vienna:[30,-28], Oxford:[30,34], Frankfurt:[30,-30], Stornoway:[30,-28], Chicago:[34,32], AnnArbor:[34,-34], Tucson:[30,30], NewOrleans:[32,36], Phila:[32,40]};
+  pts.forEach((p,idx)=>{
+    const isStart=idx===0, isEnd=idx===pts.length-1;
+    const r1 = isEnd? 9 : (isStart? 8 : 6);
+    const c=document.createElementNS(NS,'circle');
+    c.setAttribute('cx',p.x); c.setAttribute('cy',p.y);
+    c.setAttribute('r',r1);
+    c.setAttribute('class','pinDot');
+    c.setAttribute('fill', isEnd ? r.color : '#fff');
+    c.setAttribute('stroke', r.color);
+    svg.appendChild(c);
+
+    if(isActive){
+      const key = `${id}_${idx}`;
+      const base = NYC_DIRS[p.key] || [18,-22];
+      const saved = state.mapLabelOffsets[key] || {dx:base[0]*1.25, dy:base[1]*1.25};
+      const lx = p.x + saved.dx, ly = p.y + saved.dy;
+      const lab = `${p.name}`;
+      const yr = `${p.year} · ${truncateLabel(p.note, 24)}`;
+      const w = Math.min(210, Math.max(132, lab.length*7 + 24, yr.length*5.8 + 24));
+      const leader=document.createElementNS(NS,'line');
+      leader.setAttribute('x1',p.x); leader.setAttribute('y1',p.y);
+      leader.setAttribute('x2',lx); leader.setAttribute('y2',ly);
+      leader.setAttribute('class','leader');
+      svg.appendChild(leader);
+      const g=document.createElementNS(NS,'g');
+      g.setAttribute('class','labelDrag');
+      g.dataset.key=key;
+      const bx = saved.dx<0 ? lx-w+4 : lx-4;
+      const by = ly-16;
+      const anchor = saved.dx<0 ? 'end' : 'start';
+      const tx = saved.dx<0 ? lx-8 : lx+8;
+      const t1=document.createElementNS(NS,'text');
+      t1.setAttribute('x',tx); t1.setAttribute('y',ly-2);
+      t1.setAttribute('text-anchor',anchor);
+      t1.setAttribute('class','pinLabel'); t1.textContent=lab;
+      g.appendChild(t1);
+      const t2=document.createElementNS(NS,'text');
+      t2.setAttribute('x',tx); t2.setAttribute('y',ly+14);
+      t2.setAttribute('text-anchor',anchor);
+      t2.setAttribute('class','pinYear'); t2.textContent=yr;
+      g.appendChild(t2);
+      svg.appendChild(g);
+      attachMapLabelDrag(g, leader, p, key, saved);
+    }
+  });
+}
+
+function truncateLabel(str, n){ return str && str.length>n ? str.slice(0,n)+'…' : str; }
+
+function attachMapLabelDrag(group, leader, point, key, saved){
+  let startX=0,startY=0,baseDx=0,baseDy=0,dragging=false;
+  group.addEventListener('mousedown',e=>{
+    e.stopPropagation(); e.preventDefault();
+    dragging=true; group.classList.add('dragging');
+    startX=e.clientX; startY=e.clientY; baseDx=saved.dx; baseDy=saved.dy;
+    function move(ev){
+      if(!dragging) return;
+      const dx=(ev.clientX-startX)/state.map.zoom;
+      const dy=(ev.clientY-startY)/state.map.zoom;
+      const ndx=baseDx+dx, ndy=baseDy+dy;
+      state.mapLabelOffsets[key]={dx:ndx,dy:ndy};
+      const ddx=ndx-saved.dx, ddy=ndy-saved.dy;
+      group.setAttribute('transform',`translate(${ddx},${ddy})`);
+      leader.setAttribute('x2',point.x+ndx); leader.setAttribute('y2',point.y+ndy);
+    }
+    function up(){ dragging=false; group.classList.remove('dragging'); window.removeEventListener('mousemove',move); window.removeEventListener('mouseup',up); renderMap(); }
+    window.addEventListener('mousemove',move); window.addEventListener('mouseup',up);
+  });
+}
+
+function renderRouteDock(activeId){
+  const grid=$('#routeGrid'); if(!grid) return;
+  grid.innerHTML=Object.keys(routes).map(id=>`<button class="routePick ${id===activeId?'active':''}" data-routepick="${id}">${nodeById[id]?.label||id}</button>`).join('');
+  grid.querySelectorAll('[data-routepick]').forEach(btn=>btn.onclick=()=>{ state.selected=btn.dataset.routepick; renderAll(); toast('已切换路线：'+(nodeById[state.selected]?.label||state.selected)); });
+}
+
+/* =========================================================
+   面板
+   ========================================================= */
+function renderPanel(){
+  const panel=$('#panel');
+  const n=currentNode();
+  panel.classList.toggle('closed', !state.panelOpen);
+  const era=eras.find(e=>e.id===n.era);
+  let extra='';
+  if(state.mode==='ma'){
+    extra=`<div class="box"><div class="boxTitle">历史如何转译为 MA</div><ul>
+      <li><b>BASR</b> 提供证据意识和项目制传统，今天转化为研究设计、方法训练和论文写作。</li>
+      <li><b>Merton</b> 提供理论与经验材料之间的连接方式，帮助学生把兴趣改造成可论证的问题。</li>
+      <li><b>White / Tilly</b> 让项目带有关系社会学和历史机制取向，适合不满足于泛泛谈议题的学生。</li>
+      <li><b>Milstein</b> 提醒我们，MA 的真实质量还取决于课程协调、学生支持和学术社群的持续运行。</li>
+    </ul></div>`;
+  }
+  if(state.mode==='debate'){
+    extra=`<div class="box"><div class="boxTitle">争论读法</div><ul>
+      <li><b>Adorno vs Lazarsfeld</b>：争论的不是音乐品味，而是文化能否被改写成可管理的传播效果。</li>
+      <li><b>Mills vs 抽象经验主义</b>：争论的不是要不要方法，而是方法是否遮蔽了历史结构和公共问题。</li>
+      <li>因此哥大不是单纯的“量化强校”。它同时生产行政研究、理论概念、公共批判和后来的关系社会学。</li>
+    </ul></div>`;
+  }
+  let mapExtra='';
+  if(state.mode==='map'){
+    const r=routes[state.selected]||routes.lazarsfeld;
+    const list = Object.keys(routes).map(id=>`<button class="chip ${id===(routes[state.selected]?state.selected:'lazarsfeld')?'active':''}" data-route="${id}">${nodeById[id]?.label||id}</button>`).join('');
+    mapExtra=`<div class="box"><div class="boxTitle">切换路线</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${list}</div></div>
+      <div class="box"><div class="boxTitle">路线节点</div>
+      <div class="timeline">${r.points.map(p=>`<div class="tItem"><div class="tDate">${p.year}</div><div class="tText"><b>${p.name}</b>：${p.note}</div></div>`).join('')}</div></div>`;
+  }
+  panel.innerHTML=`
+    <div class="panelHead">
+      <div class="panelIcon">${n.icon}</div>
+      <div>
+        <h2>${n.label}</h2>
+        <div class="sub">${n.sub}</div>
+      </div>
+      <button class="closeBtn" id="panelToggle" aria-label="折叠面板">${state.panelOpen?'›':'‹'}</button>
+    </div>
+    <div class="panelBody">
+      <div class="pill">${era?.name||''} · ${n.year}</div>
+      <div class="panelMeta">${(n.keywords||[]).map(k=>`<span class="metaTag">${k}</span>`).join('')}</div>
+      <section class="infoBlock"><h3>简介</h3><p>${n.summary}</p></section>
+      <section class="infoBlock"><h3>ta 改变了什么</h3><p>${n.changed}</p></section>
+      <section class="infoBlock"><h3>张力与盲点</h3><p>${n.conflict}</p></section>
+      <section class="infoBlock"><h3>对今天的哥大意味着什么</h3><p>${n.legacy}</p></section>
+      <section class="infoBlock"><h3>时间线</h3><div class="timeline">${(n.timeline||[]).map(t=>`<div class="tItem"><div class="tDate">${t[0]}</div><div class="tText">${t[1]}</div></div>`).join('')}</div></section>
+      ${extra}${mapExtra}
+    </div>`;
+  $('#panelToggle').onclick=()=>{ state.panelOpen=!state.panelOpen; renderAll(); };
+  panel.querySelectorAll('[data-route]').forEach(b=>b.onclick=()=>{ state.selected=b.dataset.route; renderAll(); });
+}
+
+/* =========================================================
+   平移 / 缩放 / 惯性
+   ========================================================= */
+function applyTransform(which){
+  const st=state[which];
+  const board = which==='gene'?$('#geneBoard'):$('#mapBoard');
+  board.style.transform=`translate(${st.panX}px,${st.panY}px) scale(${st.zoom})`;
+}
+function setupPanZoom(stageEl, which){
+  let dragging=false,sx=0,sy=0,bx=0,by=0,vx=0,vy=0,lastT=0,lastX=0,lastY=0,raf=null;
+  stageEl.addEventListener('mousedown',e=>{
+    if(e.target.closest('.node')) return; // 节点拖拽优先
+    dragging=true; sx=e.clientX; sy=e.clientY;
+    bx=state[which].panX; by=state[which].panY;
+    vx=vy=0; lastT=performance.now(); lastX=e.clientX; lastY=e.clientY;
+    stageEl.classList.add('dragging');
+    if(raf){cancelAnimationFrame(raf); raf=null;}
+  });
+  window.addEventListener('mousemove',e=>{
+    if(!dragging) return;
+    const nx=bx+(e.clientX-sx), ny=by+(e.clientY-sy);
+    const t=performance.now(); const dt=Math.max(1,t-lastT);
+    vx=(e.clientX-lastX)/dt*16; vy=(e.clientY-lastY)/dt*16;
+    lastT=t; lastX=e.clientX; lastY=e.clientY;
+    state[which].panX=nx; state[which].panY=ny; applyTransform(which);
+  });
+  window.addEventListener('mouseup',()=>{
+    if(!dragging) return;
+    dragging=false; stageEl.classList.remove('dragging');
+    function step(){
+      vx*=0.92; vy*=0.92;
+      if(Math.abs(vx)<.3 && Math.abs(vy)<.3){ raf=null; return; }
+      state[which].panX+=vx; state[which].panY+=vy; applyTransform(which);
+      raf=requestAnimationFrame(step);
+    }
+    raf=requestAnimationFrame(step);
+  });
+  stageEl.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const rect=stageEl.getBoundingClientRect();
+    const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+    const z0=state[which].zoom;
+    const mult=e.deltaY<0?1.1:0.9;
+    const z1=Math.max(.3, Math.min(2.4, z0*mult));
+    // 以鼠标位置为锚点
+    state[which].panX = mx - (mx-state[which].panX)*(z1/z0);
+    state[which].panY = my - (my-state[which].panY)*(z1/z0);
+    state[which].zoom=z1;
+    applyTransform(which);
+  },{passive:false});
+  stageEl.addEventListener('dblclick',e=>{
+    if(e.target.closest('.node')) return;
+    homeView(which);
+  });
+}
+function contentBounds(){
+  const v=visibleNodes();
+  if(!v.length) return {minX:0,minY:0,maxX:2400,maxY:1300};
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  v.forEach(n=>{
+    const p=baseNodePos(n);
+    minX=Math.min(minX,p.x); maxX=Math.max(maxX,p.x);
+    minY=Math.min(minY,p.y); maxY=Math.max(maxY,p.y);
+  });
+  return {minX,minY,maxX,maxY};
+}
+function homeView(which){
+  if(which==='gene'){
+    const stage=$('#geneStage'); const W=stage.clientWidth, H=stage.clientHeight;
+    const b=contentBounds();
+    const padX = state.mode==='gene' && state.era==='all' ? 220 : 260;
+    const padY = state.mode==='gene' && state.era==='all' ? 180 : 220;
+    let zoom=Math.min(W/Math.max(1,(b.maxX-b.minX+padX)), H/Math.max(1,(b.maxY-b.minY+padY)));
+    zoom = Math.min(state.mode==='gene' && state.era==='all' ? .58 : .86, Math.max(.40, zoom*.98));
+    const cx=(b.minX+b.maxX)/2, cy=(b.minY+b.maxY)/2;
+    state.gene={zoom, panX:W/2-cx*zoom, panY:H/2-cy*zoom};
+  } else {
+    const stage=$('#mapStage'); const W=stage.clientWidth, H=stage.clientHeight;
+    const zoom = Math.min(W/MAP_W, H/MAP_H)*.98;
+    state.map={zoom, panX:(W-MAP_W*zoom)/2, panY:(H-MAP_H*zoom)/2};
+  }
+  applyTransform(which);
+}
+
+function renderAll(){
+  renderEras(); renderLayers(); updateModeButtons();
+  if(state.mode==='map') renderMap(); else renderGraph();
+  renderPanel();
+  applyTransform('gene'); applyTransform('map');
+}
+
+function initInteractions(){
+  $$('.btn[data-mode]').forEach(b=>b.onclick=()=>{
+    state.mode=b.dataset.mode;
+    state.era='all';
+    if(state.mode==='gene') state.selected='';
+    else if(state.mode==='ma') state.selected='maProgram';
+    else if(state.mode==='debate') state.selected='mills';
+    else if(state.mode==='map' && !routes[state.selected]) state.selected='lazarsfeld';
+    renderAll();
+    requestAnimationFrame(()=>{ homeView(state.mode==='map'?'map':'gene'); renderAll(); });
+  });
+  $('#singleRouteBtn').onclick=()=>{ state.showContextRoutes=false;
+    $('#singleRouteBtn').classList.add('active'); $('#contextRouteBtn').classList.remove('active'); renderAll(); };
+  $('#contextRouteBtn').onclick=()=>{ state.showContextRoutes=true;
+    $('#contextRouteBtn').classList.add('active'); $('#singleRouteBtn').classList.remove('active'); renderAll(); };
+  const atl=$('#focusAtlanticBtn');
+  if(atl) atl.onclick=()=>{ homeView('map'); };
+  const east=$('#focusUSEastBtn');
+  if(east) east.onclick=()=>{ homeView('map'); };
+  $('#zoomIn').onclick=()=>{ const k=state.mode==='map'?'map':'gene'; state[k].zoom=Math.min(2.4,state[k].zoom*1.12); applyTransform(k); };
+  $('#zoomOut').onclick=()=>{ const k=state.mode==='map'?'map':'gene'; state[k].zoom=Math.max(.3,state[k].zoom*0.9); applyTransform(k); };
+  $('#zoomHome').onclick=()=>{ homeView(state.mode==='map'?'map':'gene'); };
+  $('#searchInput').addEventListener('keydown',e=>{
+    if(e.key!=='Enter') return;
+    const q=e.target.value.trim().toLowerCase(); if(!q) return;
+    const hit=nodes.find(n=>`${n.label} ${n.sub}`.toLowerCase().includes(q));
+    if(hit){
+      state.selected=hit.id;
+      if(state.mode==='ma' && !isMA(hit) && !['basr','merton','white','iserp'].includes(hit.id)) state.mode='gene';
+      if(state.mode==='debate' && !isDebate(hit)) state.mode='gene';
+      if(state.mode==='map' && !routes[hit.id]) state.mode='gene';
+      if(state.era!=='all' && hit.era!==state.era) state.era='all';
+      renderAll(); requestAnimationFrame(()=>homeView(state.mode==='map'?'map':'gene')); toast('已定位到 '+hit.label);
+    } else toast('未找到匹配节点');
+  });
+  window.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){ state.selected=''; renderAll(); }
+  });
+}
+
+setupPanZoom($('#geneStage'),'gene');
+setupPanZoom($('#mapStage'),'map');
+initInteractions();
+// 等待布局完成后再 home
+renderAll(); requestAnimationFrame(()=>{ homeView('gene'); homeView('map'); renderAll(); });
+</script>
+</body>
+</html>
