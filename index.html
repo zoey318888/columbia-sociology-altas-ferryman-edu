@@ -605,6 +605,399 @@ ul{padding-left:18px!important}
 .mapSvg .pinYear{font-size:10.8px!important;fill:#4e5a66!important;}
 </style>
 
+
+
+<style id="v10-mobile-responsive-overrides">
+/* v10: responsive layout for phones and small tablets */
+@media (max-width: 768px) {
+  html, body {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: auto !important;
+    overscroll-behavior-y: auto !important;
+  }
+
+  .app {
+    height: auto !important;
+    min-height: 100vh !important;
+    padding: 12px !important;
+    gap: 12px !important;
+    background: #fff !important;
+  }
+
+  .top {
+    display: block !important;
+    min-height: auto !important;
+    padding: 0 0 12px 0 !important;
+    border-bottom: 1px solid #d9dfe5 !important;
+  }
+
+  .kicker {
+    font-size: 10px !important;
+    letter-spacing: .18em !important;
+  }
+
+  .title {
+    font-size: 24px !important;
+    line-height: 1.12 !important;
+    letter-spacing: -.02em !important;
+  }
+
+  .subtitle {
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+    margin-top: 4px !important;
+  }
+
+  .controls {
+    margin-top: 12px !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 14px !important;
+    padding-bottom: 5px !important;
+    justify-content: flex-start !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .btn {
+    flex: 0 0 auto !important;
+    font-size: 13px !important;
+    padding: 9px 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .searchWrap {
+    display: none !important;
+  }
+
+  .main {
+    position: static !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+  }
+
+  .sidebar {
+    display: none !important;
+  }
+
+  .canvas,
+  .canvas.withPanel {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    height: 58vh !important;
+    min-height: 420px !important;
+    max-height: 640px !important;
+    border: 1px solid #e3e7eb !important;
+    overflow: hidden !important;
+    background: #fff !important;
+  }
+
+  .view.active {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+  }
+
+  .stage {
+    touch-action: none !important;
+  }
+
+  .legendStrip {
+    left: 12px !important;
+    top: 12px !important;
+    right: 12px !important;
+    display: flex !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+    gap: 14px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .chip {
+    flex: 0 0 auto !important;
+    font-size: 12px !important;
+    margin-right: 0 !important;
+    padding: 7px 0 !important;
+  }
+
+  .zoomBox {
+    right: 12px !important;
+    bottom: 12px !important;
+    gap: 8px !important;
+  }
+
+  .zoomBtn {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 16px !important;
+    background: rgba(255,255,255,.95) !important;
+  }
+
+  .node {
+    max-width: 130px !important;
+  }
+
+  .node.hero .icon {
+    width: 82px !important;
+    height: 82px !important;
+  }
+
+  .node.big .icon {
+    width: 70px !important;
+    height: 70px !important;
+  }
+
+  .node.mid .icon {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  .node.small .icon {
+    width: 52px !important;
+    height: 52px !important;
+  }
+
+  .node.hero .emoji { font-size: 34px !important; }
+  .node.big .emoji { font-size: 29px !important; }
+  .node.mid .emoji { font-size: 25px !important; }
+  .node.small .emoji { font-size: 22px !important; }
+
+  .label {
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    max-width: 120px !important;
+    white-space: normal !important;
+  }
+
+  .label small {
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+  }
+
+  .panel,
+  .panel.closed {
+    position: relative !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    margin-top: 12px !important;
+    border-left: 0 !important;
+    border-top: 1px solid #d9dfe5 !important;
+    display: block !important;
+    transform: none !important;
+    background: #fff !important;
+  }
+
+  .panel.closed .panelHead,
+  .panelHead {
+    margin: 0 !important;
+    padding: 16px 0 12px 0 !important;
+    display: grid !important;
+    grid-template-columns: auto 1fr !important;
+    gap: 10px !important;
+    text-align: left !important;
+    border-bottom: 1px solid #d9dfe5 !important;
+  }
+
+  .panel.closed .panelBody,
+  .panel.closed .panelMeta,
+  .panel.closed h2,
+  .panel.closed .sub,
+  .panelBody,
+  .panelMeta,
+  .panel h2,
+  .sub {
+    display: block !important;
+  }
+
+  .panelIcon {
+    font-size: 26px !important;
+  }
+
+  .panel h2 {
+    font-size: 22px !important;
+    line-height: 1.18 !important;
+  }
+
+  .sub {
+    font-size: 12.5px !important;
+  }
+
+  .panelBody {
+    padding: 14px 0 24px 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .closeBtn {
+    display: none !important;
+  }
+
+  .pill {
+    font-size: 12px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .panelMeta {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px 10px !important;
+  }
+
+  .metaTag {
+    font-size: 12px !important;
+  }
+
+  .box,
+  .infoBlock {
+    margin-top: 16px !important;
+    padding-top: 15px !important;
+  }
+
+  .boxTitle,
+  .infoBlock h3 {
+    font-size: 14px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .box p,
+  .box li,
+  .infoBlock p,
+  .infoBlock .bulletList li,
+  .tText {
+    font-size: 14px !important;
+    line-height: 1.78 !important;
+  }
+
+  .infoBlock .bulletList {
+    gap: 7px !important;
+    padding-left: 18px !important;
+  }
+
+  .timeline {
+    padding-left: 12px !important;
+  }
+
+  /* Map mode uses a vertical composition: map first, route notes below. */
+  .main.mapMode .canvas,
+  .main.mapMode .canvas.withPanel {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border: 0 !important;
+  }
+
+  .main.mapMode #mapView.view.active {
+    position: relative !important;
+    inset: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    display: block !important;
+  }
+
+  .main.mapMode #mapStage {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    height: 52vh !important;
+    min-height: 360px !important;
+    max-height: 560px !important;
+    border: 1px solid #e3e7eb !important;
+    overflow: hidden !important;
+  }
+
+  .main.mapMode .routeDock {
+    position: relative !important;
+    right: auto !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin-top: 12px !important;
+    padding: 12px 0 0 0 !important;
+    border-left: 0 !important;
+    border-top: 1px solid #d9dfe5 !important;
+    background: #fff !important;
+    backdrop-filter: none !important;
+  }
+
+  .routeButtonList {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0 12px !important;
+  }
+
+  .routePick {
+    font-size: 13px !important;
+    padding: 10px 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .routeDetail {
+    margin-top: 4px !important;
+  }
+
+  .routeDetailItem p {
+    font-size: 13.5px !important;
+    line-height: 1.72 !important;
+  }
+
+  .routeDetailMeta {
+    flex-wrap: wrap !important;
+    gap: 4px 8px !important;
+  }
+
+  .routeDetailMeta b {
+    font-size: 13px !important;
+  }
+
+  .mapSvg .pinLabel {
+    font-size: 11px !important;
+  }
+
+  .mapSvg .pinYear {
+    font-size: 10px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .canvas,
+  .canvas.withPanel {
+    height: 56vh !important;
+    min-height: 390px !important;
+  }
+
+  .main.mapMode #mapStage {
+    height: 50vh !important;
+    min-height: 330px !important;
+  }
+
+  .title {
+    font-size: 22px !important;
+  }
+
+  .node.hero .icon { width: 76px !important; height: 76px !important; }
+  .node.big .icon { width: 64px !important; height: 64px !important; }
+  .node.mid .icon { width: 56px !important; height: 56px !important; }
+  .node.small .icon { width: 48px !important; height: 48px !important; }
+
+  .routeButtonList {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -1471,7 +1864,7 @@ const nodes = [
       "哥大从此需要寻找新的认识论和组织方式。"
     ],
     "conflict": [
-      "编码问卷，用打孔机器跑统计数据，密集式的工厂协作在新技术出现后已经过时。",
+      "编码问卷，用打孔机器跑统计数据，密集式的工厂协作在新计算技术出现后已经过时。",
       "美国社会学的量化、教育和地位获得研究在 Wisconsin、Michigan、Chicago 等地形成新的制度基地。"
     ],
     "legacy": [
@@ -1527,7 +1920,7 @@ const nodes = [
       "Thomas 与 Znaniecki 的《波兰农民在欧洲和美国》(1918–20) 是其奠基性作品之一。"
     ],
     "changed": [
-      "芝加哥提供了另一条美国社会学起源路线：不是统计测量，而是参与观察、生命史、城市行走和社区民族志。",
+      "芝加哥提供了另一条美国社会学起源路线：参与观察、生命史、城市行走和社区民族志。",
       "它与哥大形成清晰对照：芝加哥擅长质性田野和城市生态，哥大擅长量化调查和组织化大项目。"
     ],
     "conflict": [
@@ -1575,25 +1968,25 @@ const nodes = [
     "label": "威斯康辛模型",
     "sub": "Quantitative shift west",
     "summary": [
-      "威斯康辛模型象征美国量化社会学重心从纽约向中西部转移。",
-      "它围绕教育、职业流动、家庭背景和地位获得，建立了成熟的量化研究范式。"
+      "这是William Sewell团队在1960-70年代建立的地位获得研究范式。核心问题是：父亲职业、父母教育、家庭收入、教师期望这些因素，如何通过路径分析（path analysis）串联成一个解释"出身如何变成命运"的因果模型。",
+      "密歇根的Survey Research Center则提供了方法上的配套——全国性追踪调查的数据采集与面板数据统计工具。"
     ],
     "changed": [
-      "量化社会学没有随 BASR 衰落而消失，而是在 Wisconsin、Michigan、Chicago 等地找到新的制度基地。",
-      "学科中心由纽约的项目制研究机器转向中西部的调查、分层和教育流动研究集群。"
+      "哥大BASR问的是此刻这群人怎么想（横截面、态度测量、民意调查）；威斯康辛问的是同一批人的位置为什么变了（纵贯追踪、社会流动）。",
+      "布劳与邓肯1967年的《美国职业结构》是标志性成果，统计工具也从相关分析转向路径分析，并奠定了后来结构方程模型（SEM）在社会科学中普及的基础。"
     ],
     "conflict": [
-      "对哥大而言，这意味着失去的不是一个研究中心，而是全国范围内定义主流方法的权力。",
-      "方法传统仍在延续，但其地理和组织基地已经改变。"
+      "路径分析把社会流动简化为变量间的线性传导，容易忽略制度性歧视、文化机制和关系结构。",
+      "女权主义社会学者指出，这套模型长期以男性职业路径为默认，对女性的处境缺乏解释力。"
     ],
     "legacy": [
-      "威斯康辛模型把教育分层、地位获得和生命周期调查推进为美国社会学的主流议题。",
-      "它构成理解哥大中衰的重要参照。"
+      "直接催生了今天教育社会学、劳动市场和社会流动研究的方法标准。",
+      "对哥大而言，它是一个参照点：BASR关闭后哥大既没有复制这套路线，也没有立刻找到替代方向，这正是1977-1988年真空期的实质。"
     ],
     "keywords": [
       "地位获得",
       "量化西移",
-      "学术地理"
+      "纵贯调查"
     ],
     "timeline": [
       [
@@ -2229,7 +2622,7 @@ function P(key,year,note){ const c=CITIES[key]; const [x,y]=proj(c[0],c[1]); ret
 
 const routes = {
   maciver:{color:'#8B5CF6',mini:'Stornoway → Oxford → Toronto → Columbia',points:[
-    P('Stornoway','1882','外赫布里底群岛是苏格兰偏远的盖尔语区。他在与主流英语文化存在明显边界的社区中长大，这直接激发了他对“共同体”和“文化边界”的理论兴趣。《Community》(1917) 就建立在这一经验之上。'),
+    P('Stornoway','1882','他成长于外赫布里底群岛是苏格兰偏远的盖尔语区，一个与主流英语文化存在明显边界的社区，这直接激发了他对“共同体”和“文化边界”的理论兴趣。《Community》(1917) 就建立在这一经验之上。'),
     P('Oxford','1900s','在 Oxford Oriel College 接受古典学与哲学训练，使他形成与 Giddings 完全不同的社会学语言：不是统计测量，而是概念辨析和历史理解。'),
     P('Toronto','1915–27','因一战期间的反战立场离开英国，在多伦多大学任教 12 年并担任系主任。这段经历让他在政治意识和组织管理上都成熟起来。'),
     P('NewYork','1929','进入哥大后，他为统计取向的早期社会学提供理论对位。1944 年在 BASR 扩张压力下辞去系主任职务。')
@@ -2819,7 +3212,7 @@ function renderPanel(){
   }
   if(state.mode==='debate'){
     extra=`<div class="box"><div class="boxTitle">争论读法</div><ul>
-      <li><b>Adorno vs Lazarsfeld</b>：争论的不是音乐品味，而是文化能否被改写成可管理的传播效果。</li>
+      <li><b>Adorno vs Lazarsfeld</b>：争论的是文化能否被改写成可管理的传播效果。</li>
       <li><b>Mills vs 抽象经验主义</b>：争论的不是要不要方法，而是方法是否遮蔽了历史结构和公共问题。</li>
       <li><b>Chicago vs Columbia</b>：一条偏城市民族志和生态学，一条偏量化调查和组织化项目。</li>
     </ul></div>`;
@@ -2987,8 +3380,99 @@ function initInteractions(){
   });
 }
 
+
+
+/* =========================================================
+   移动端触屏支持：单指拖拽、双指缩放、点击节点后滚动到详情
+   ========================================================= */
+function scrollToPanelOnMobile(){
+  if(window.innerWidth <= 768){
+    setTimeout(()=>{
+      document.querySelector('#panel')?.scrollIntoView({behavior:'smooth', block:'start'});
+    },80);
+  }
+}
+
+function setupTouchPanZoom(stageEl, which){
+  if(!stageEl) return;
+  let lastTouches=[];
+  let startPan={x:0,y:0};
+  let startZoom=1;
+  let startDist=0;
+  let startMid={x:0,y:0};
+
+  const dist=(a,b)=>Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+  const mid=(a,b)=>({x:(a.clientX+b.clientX)/2, y:(a.clientY+b.clientY)/2});
+
+  stageEl.addEventListener('touchstart',e=>{
+    if(e.target.closest('.node')) return;
+    if(e.touches.length===1){
+      const t=e.touches[0];
+      lastTouches=[{x:t.clientX,y:t.clientY}];
+      startPan={x:state[which].panX,y:state[which].panY};
+    } else if(e.touches.length===2){
+      e.preventDefault();
+      startDist=dist(e.touches[0],e.touches[1]);
+      startMid=mid(e.touches[0],e.touches[1]);
+      startZoom=state[which].zoom;
+      startPan={x:state[which].panX,y:state[which].panY};
+    }
+  }, {passive:false});
+
+  stageEl.addEventListener('touchmove',e=>{
+    if(e.target.closest('.node')) return;
+    if(e.touches.length===1 && lastTouches.length===1){
+      e.preventDefault();
+      const t=e.touches[0];
+      state[which].panX=startPan.x+(t.clientX-lastTouches[0].x);
+      state[which].panY=startPan.y+(t.clientY-lastTouches[0].y);
+      applyTransform(which);
+    } else if(e.touches.length===2){
+      e.preventDefault();
+      const d=dist(e.touches[0],e.touches[1]);
+      const m=mid(e.touches[0],e.touches[1]);
+      const rect=stageEl.getBoundingClientRect();
+      const mx=startMid.x-rect.left;
+      const my=startMid.y-rect.top;
+      const z0=startZoom;
+      const z1=Math.max(.28, Math.min(2.6, startZoom*(d/startDist)));
+      state[which].panX = mx - (mx-startPan.x)*(z1/z0) + (m.x-startMid.x);
+      state[which].panY = my - (my-startPan.y)*(z1/z0) + (m.y-startMid.y);
+      state[which].zoom=z1;
+      applyTransform(which);
+    }
+  }, {passive:false});
+
+  stageEl.addEventListener('touchend',()=>{ lastTouches=[]; }, {passive:true});
+}
+
+document.addEventListener('click', e=>{
+  const node=e.target.closest('#nodeLayer .node');
+  if(node && window.innerWidth <= 768){
+    e.stopPropagation();
+    state.selected=node.dataset.id;
+    state.panelOpen=true;
+    renderAll();
+    scrollToPanelOnMobile();
+  }
+});
+
+let resizeTimer=null;
+window.addEventListener('resize',()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer=setTimeout(()=>{
+    const current = state.mode === 'map' ? 'map' : 'gene';
+    requestAnimationFrame(()=>{
+      homeView(current);
+      renderAll();
+    });
+  },120);
+});
+
 setupPanZoom($('#geneStage'),'gene');
 setupPanZoom($('#mapStage'),'map');
+setupTouchPanZoom($('#geneStage'),'gene');
+setupTouchPanZoom($('#mapStage'),'map');
 initInteractions();
 // 等待布局完成后再 home
 renderAll(); requestAnimationFrame(()=>{ homeView('gene'); homeView('map'); renderAll(); });
