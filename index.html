@@ -2515,7 +2515,7 @@ const nodes = [
       "全球化、迁移与不平等：Sassen、Wimmer、Yao Lu、Jennifer Lee、Mario Small 等相关方向使项目可以连接全球城市、移民与族群边界、教育与劳动力市场、家庭背景、阶层再生产和跨国不平等。",
       "知识、科学与专家系统：Eyal、Stark、Vaughan 等方向对应 science, knowledge and technology cluster，适合研究专家权威、分类制度、医学或技术知识、组织失误和知识如何进入治理。",
       "历史社会学与政治社会学：Tilly 之后的传统使哥大不只关注当下城市经验，也关注国家形成、社会运动、制度变迁、法律、宗教、知识生产和政治经济过程。",
-      "除纽约城市民族志之外，哥大社会学系也保留了清晰的中国研究入口：Chinese Society 被列为独立研究兴趣方向，并与不平等与分层、迁移、健康与人口、政治社会学、量化方法和计算社会科学等议题交叉展开。",
+      "除纽约城市民族志之外，哥大社会学系也保留了清晰的中国研究入口：Chinese Society 被列为独立研究兴趣方向，并与不平等与分层、迁移、健康与人口、政治社会学、量化方法和计算社会科学等议题交叉展开。"
     ],
     "conflict": [
       "它的边界在于：这是一年制 MA，不是博士阶段的长期学徒制。它能提供高强度的研究设计、方法训练和论文指导，但不能替代多年田野积累或完整博士训练。",
@@ -3469,13 +3469,31 @@ window.addEventListener('resize',()=>{
   },120);
 });
 
-setupPanZoom($('#geneStage'),'gene');
-setupPanZoom($('#mapStage'),'map');
-setupTouchPanZoom($('#geneStage'),'gene');
-setupTouchPanZoom($('#mapStage'),'map');
-initInteractions();
-// 等待布局完成后再 home
-renderAll(); requestAnimationFrame(()=>{ homeView('gene'); homeView('map'); renderAll(); });
+function bootAtlas(){
+  try {
+    setupPanZoom($('#geneStage'),'gene');
+    setupPanZoom($('#mapStage'),'map');
+    setupTouchPanZoom($('#geneStage'),'gene');
+    setupTouchPanZoom($('#mapStage'),'map');
+    initInteractions();
+    // 等待布局完成后再 home
+    renderAll();
+    requestAnimationFrame(()=>{ homeView('gene'); homeView('map'); renderAll(); });
+  } catch (err) {
+    console.error('Atlas init failed:', err);
+    const main = document.querySelector('#main') || document.body;
+    const pre = document.createElement('pre');
+    pre.style.cssText = 'position:fixed;left:16px;right:16px;bottom:16px;z-index:99999;background:#fff3f3;color:#8a1f1f;border:1px solid #e7bcbc;padding:12px;white-space:pre-wrap;font-size:12px;line-height:1.5;max-height:40vh;overflow:auto;';
+    pre.textContent = '页面脚本初始化失败：\n' + (err && (err.stack || err.message) || String(err));
+    main.appendChild(pre);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootAtlas);
+} else {
+  bootAtlas();
+}
 </script>
 </body>
 </html>
